@@ -61,6 +61,8 @@ namespace nnunet_client
             ImageListControl.SelectedItemChanged += (object sender, VMSImage selectedImage) =>
             {
                 MessageBox.Show("You selected: " + selectedImage.Id);
+
+                AutoSegControl.SetImage(selectedImage);
                 
             };
         }

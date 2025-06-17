@@ -4,11 +4,11 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <ProjectGuid>{42B68FF6-1FF8-45E4-8AAB-2397D5665170}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <UseWPF>true</UseWPF>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>nnunet_client</RootNamespace>
-    <AssemblyName>nnunet_client</AssemblyName>
+    <AssemblyName>esapi_nnunet_client</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -31,6 +31,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -84,8 +87,8 @@
     <Compile Include="UI\AutoCompleteTextBox.xaml.cs">
       <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\AutoSeg.xaml.cs">
-      <DependentUpon>AutoSeg.xaml</DependentUpon>
+    <Compile Include="UI\AutoSegControl.xaml.cs">
+      <DependentUpon>AutoSegControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\SegmentationTemplateEditor.xaml.cs">
       <DependentUpon>SegmentationTemplateEditor.xaml</DependentUpon>
@@ -95,7 +98,6 @@
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="_data\seg\templates\bladder_art.json" />
-    <None Include="_data\seg\templates\tg101.json" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="ART.xaml">
@@ -106,7 +108,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UI\AutoSeg.xaml">
+    <Page Include="UI\AutoSegControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -121,6 +123,8 @@
       <Name>esapi</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include=".gitignore" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

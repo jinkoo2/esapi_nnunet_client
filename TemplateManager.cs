@@ -2,19 +2,23 @@
 using System.Collections.Generic;
 using System.IO;
 
-public class TemplateManager
+namespace esapi
 {
-    public Dictionary<string, SegmentationTemplate> Templates { get; private set; } = new Dictionary<string, SegmentationTemplate>();
-
-    public void LoadTemplates(string directory)
+    public class TemplateManager
     {
-        Templates.Clear();
-        foreach (var file in Directory.GetFiles(directory, "*.json"))
+        public Dictionary<string, SegmentationTemplate> Templates { get; private set; } = new Dictionary<string, SegmentationTemplate>();
+
+        public void LoadTemplates(string directory)
         {
-            var json = File.ReadAllText(file);
-            var template = JsonConvert.DeserializeObject<SegmentationTemplate>(json);
-            if (template?.Name != null)
-                Templates[template.Name] = template;
+            Templates.Clear();
+            foreach (var file in Directory.GetFiles(directory, "*.json"))
+            {
+                var json = File.ReadAllText(file);
+                var template = JsonConvert.DeserializeObject<SegmentationTemplate>(json);
+                if (template?.Name != null)
+                    Templates[template.Name] = template;
+            }
         }
     }
+
 }

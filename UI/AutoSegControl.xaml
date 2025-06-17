@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="nnunet_client.UI.AutoSeg"
+﻿<UserControl x:Class="nnunet_client.UI.AutoSegControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -24,6 +24,7 @@
         <!-- Label for Selected Image Id --> 
         <Label x:Name="ImageId"
            Content="Image Not Loaded"
+           HorizontalAlignment="Left"
            Grid.Row="0"
            Margin="0 0 0 5"/>
 
@@ -31,6 +32,7 @@
         <!-- ComboBox for templates -->
         <ComboBox x:Name="TemplateSelector"
               Grid.Row="1"
+              HorizontalAlignment="Left"
               Width="300"
               Margin="0 0 0 5"
               SelectionChanged="TemplateSelector_SelectionChanged" />

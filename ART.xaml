@@ -38,7 +38,7 @@
             </TabItem>
 
             <TabItem Header="AutoSeg">
-                <ui:AutoSeg/>
+                <ui:AutoSegControl x:Name="AutoSegControl"/>
             </TabItem>
 
             <TabItem Header="AutoPlan">

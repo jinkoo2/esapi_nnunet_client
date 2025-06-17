@@ -12,15 +12,23 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using static SegmentationTemplate;
+using esapi;
+
+
+
 
 namespace nnunet_client.UI
 {
+
+
+
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
     public partial class SegmentationTemplateEditor : UserControl
     {
+
+
         public SegmentationTemplateEditor()
         {
             InitializeComponent();

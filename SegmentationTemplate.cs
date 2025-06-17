@@ -1,29 +1,36 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Media;
 
-public class SegmentationTemplate
+namespace esapi
 {
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public List<ContourItem> ContourList { get; set; } = new List<ContourItem>();
 
-    public class ContourItem
+    public class SegmentationTemplate
     {
-        public string Id { get; set; }
-        public string Type { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public List<ContourItem> ContourList { get; set; } = new List<ContourItem>();
 
-        [JsonIgnore]
-        public Color Color { get; set; }
-
-        [JsonProperty("color")]
-        public string ColorString
+        public class ContourItem
         {
-            get => Color.ToString(); // e.g., "#FF0000FF"
-            set
+            public string Id { get; set; }
+            public string Type { get; set; }
+
+            [JsonIgnore]
+            public Color Color { get; set; } = Colors.Transparent;
+
+            [JsonProperty("Color")]
+            public string ColorString
             {
-                if (!string.IsNullOrEmpty(value))
+                get
+                {
+                    var converter = new ColorConverter();
+                    return converter.ConvertToString(Color);
+                }
+
+                set
                 {
                     try
                     {
@@ -35,13 +42,31 @@ public class SegmentationTemplate
                     }
                 }
             }
+
+            public bool HighResolution { get; set; }
+            public string ModelId { get; set; }
+            public string ModelLabel { get; set; }
+
+            [JsonIgnore]
+            public SolidColorBrush ColorBrush => new SolidColorBrush(Color);
+
+            [JsonIgnore]
+            public List<string> DicomTypes { get; } = new List<string>
+    {
+        "ORGAN", "PTV", "CTV", "GTV", "MARKER", "SUPPORT", "AVOID"
+    };
+
+
+            [JsonIgnore]
+            public List<string> ModelIds { get; } = new List<string>
+    {
+        "MODEL1", "MODEL2"
+    };
+
+
+
         }
-
-        public bool HighResolution { get; set; }
-        public string ModelId { get; set; }
-        public string ModelLabel { get; set; }
-
-        [JsonIgnore]
-        public SolidColorBrush ColorBrush => new SolidColorBrush(Color);
     }
+
+
 }
