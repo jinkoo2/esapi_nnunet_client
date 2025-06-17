@@ -1,0 +1,30 @@
+{
+  "name": "TG101",
+  "description": "auto segmentation template for bladder art",
+  "contour_list": [
+    {
+      "id": "Bladder",
+      "type": "ORGAN",
+      "color": "FFFF00",
+      "high_resolution": false,
+      "model_id": "Dataset015_CBCTBladderRectumBowel2.lowres",
+      "model_label": "bladder"
+    },
+    {
+      "id": "Rectum",
+      "type": "ORGAN",
+      "color": "Brown",
+      "high_resolution": false,
+      "model_id": "Dataset015_CBCTBladderRectumBowel2.lowres",
+      "model_label": "rectum"
+    },
+    {
+      "id": "Bladder",
+      "type": "ORGAN",
+      "color": "Blue",
+      "high_resolution": false,
+      "model_id": "Dataset015_CBCTBladderRectumBowel2.lowres",
+      "model_label": "bowel"
+    }
+  ]
+}

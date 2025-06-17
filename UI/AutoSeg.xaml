@@ -1,0 +1,52 @@
+﻿<UserControl x:Class="nnunet_client.UI.AutoSeg"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:nnunet_client.UI"
+             xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+             xmlns:wfi="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
+             xmlns:esapiu="clr-namespace:esapi.UI;assembly=esapi"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800" MinHeight="100" MinWidth="100">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- ComboBox -->
+            <RowDefinition Height="Auto"/>
+            <!-- Label -->
+            <RowDefinition Height="*"/>
+            <!-- Editor -->
+        </Grid.RowDefinitions>
+
+
+        <!-- Label for Selected Image Id --> 
+        <Label x:Name="ImageId"
+           Content="Image Not Loaded"
+           Grid.Row="0"
+           Margin="0 0 0 5"/>
+
+        
+        <!-- ComboBox for templates -->
+        <ComboBox x:Name="TemplateSelector"
+              Grid.Row="1"
+              Width="300"
+              Margin="0 0 0 5"
+              SelectionChanged="TemplateSelector_SelectionChanged" />
+
+
+        <!-- Segmentation template editor -->
+        <local:SegmentationTemplateEditor x:Name="SegTemplateEditor"
+                                      Grid.Row="2"/>
+        
+        <!--
+        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="2" Margin="5">
+            <wfi:WindowsFormsHost HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <esapiu:ImageOneViewUserControl x:Name="ImageOneView" />
+            </wfi:WindowsFormsHost>
+        </Border>
+        -->
+    
+    </Grid>
+</UserControl>
