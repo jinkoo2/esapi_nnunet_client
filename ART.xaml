@@ -2,15 +2,15 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="clr-namespace:nnunet_client.UI"
-        xmlns:esapiu="clr-namespace:esapi.UI;assembly=esapi"
-        Title="Hello" Height="640" Width="960">
+        xmlns:esapiui="clr-namespace:esapi.UI;assembly=esapi"
+        Title="Bladder ART" Height="640" Width="960">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Adaptive RT"
+        <TextBlock Text="Bladder ART"
                     Grid.Row="0"
                    FontSize="24"
                    HorizontalAlignment="Center"
@@ -20,28 +20,32 @@
         <TabControl Grid.Row="1">
             <TabItem Header="Patient">
                 <StackPanel Margin="10" Orientation="Vertical">
-                    <ui:AutoCompleteTextBox x:Name="PatientSearchBox"
+                    <esapiui:AutoCompleteTextBox x:Name="PatientSearchBox"
                                  Margin="0,0,0,10"
                                  HorizontalAlignment="Stretch"/>
 
-                    <esapiu:PatientControl x:Name="PatientControl"
+                    <esapiui:PatientControl x:Name="PatientControl"
                            HorizontalAlignment="Stretch"/>
                 </StackPanel>
             </TabItem>
 
             <TabItem Header="Images">
                 <Grid>
-                    <esapiu:ImageListUserControl x:Name="ImageListControl"
+                    <esapiui:ImageListUserControl x:Name="ImageListControl"
                                      HorizontalAlignment="Stretch"
                                      VerticalAlignment="Stretch" />
                 </Grid>
             </TabItem>
 
-            <TabItem Header="AutoSeg">
-                <ui:AutoSegControl x:Name="AutoSegControl"/>
+            <TabItem Header="AutoContour">
+                <ui:AutoContourControl x:Name="AutoSegControl"/>
             </TabItem>
 
             <TabItem Header="AutoPlan">
+                <ui:AutoPlanControl x:Name="AutoPlanControl"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Margin="10"/>
             </TabItem>
 
 

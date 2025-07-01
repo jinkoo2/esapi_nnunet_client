@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="nnunet_client.UI.AutoSegControl"
+﻿<UserControl x:Class="nnunet_client.UI.AutoContourControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -13,11 +13,9 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- ComboBox -->
             <RowDefinition Height="Auto"/>
-            <!-- Label -->
             <RowDefinition Height="*"/>
-            <!-- Editor -->
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
 
@@ -50,5 +48,11 @@
         </Border>
         -->
     
+        <!-- buttons-->
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="10" HorizontalAlignment="Center">
+            <Button x:Name="SubmitButton" Click="SubmitButton_Click" MinWidth="100" Margin="10,5" Padding="5">Submit</Button>
+            <Button x:Name="CheckStatusButton" Click="CheckStatusButton_Click" MinWidth="100" Margin="10,5" Padding="5">Check Status</Button>
+            <Button x:Name="ImportContoursButton" Click="ImportContoursButton_Click" MinWidth="100" Margin="10,5" Padding="5">Import Contours</Button>
+        </StackPanel>
     </Grid>
 </UserControl>

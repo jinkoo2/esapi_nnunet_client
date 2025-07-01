@@ -45,24 +45,15 @@ namespace esapi
 
             public bool HighResolution { get; set; }
             public string ModelId { get; set; }
-            public string ModelLabel { get; set; }
+            public string ModelLabelName { get; set; }
+
+            public int ModelLabelNumber { get; set; }
+
+
+            public string Status { get; set; } = "Unknown";
 
             [JsonIgnore]
             public SolidColorBrush ColorBrush => new SolidColorBrush(Color);
-
-            [JsonIgnore]
-            public List<string> DicomTypes { get; } = new List<string>
-    {
-        "ORGAN", "PTV", "CTV", "GTV", "MARKER", "SUPPORT", "AVOID"
-    };
-
-
-            [JsonIgnore]
-            public List<string> ModelIds { get; } = new List<string>
-    {
-        "MODEL1", "MODEL2"
-    };
-
 
 
         }

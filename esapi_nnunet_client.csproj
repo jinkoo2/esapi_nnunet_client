@@ -39,9 +39,14 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\create_plan\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="SimpleITKCSharpManaged, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SimpleITK-1.2.4-CSharp-win64-x64\SimpleITKCSharpManaged.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
@@ -78,17 +83,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="bladder_art.cs" />
+    <Compile Include="filesystem.cs" />
+    <Compile Include="global.cs" />
+    <Compile Include="helper.cs" />
+    <Compile Include="piduuid.cs" />
     <Compile Include="TemplateManager.cs" />
     <Compile Include="SegmentationTemplate.cs" />
     <Compile Include="main.cs" />
     <Compile Include="ART.xaml.cs">
       <DependentUpon>ART.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\AutoCompleteTextBox.xaml.cs">
-      <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
+    <Compile Include="UI\AutoContourControl.xaml.cs">
+      <DependentUpon>AutoContourControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\AutoSegControl.xaml.cs">
-      <DependentUpon>AutoSegControl.xaml</DependentUpon>
+    <Compile Include="UI\AutoPlanControl.xaml.cs">
+      <DependentUpon>AutoPlanControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\SegmentationTemplateEditor.xaml.cs">
       <DependentUpon>SegmentationTemplateEditor.xaml</DependentUpon>
@@ -104,11 +114,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UI\AutoCompleteTextBox.xaml">
+    <Page Include="UI\AutoContourControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UI\AutoSegControl.xaml">
+    <Page Include="UI\AutoPlanControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -121,6 +131,14 @@
     <ProjectReference Include="..\esapi\esapi.csproj">
       <Project>{c6188a23-35dd-4b92-95af-9de6d76e42a0}</Project>
       <Name>esapi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\nnunet\nnunet.csproj">
+      <Project>{ecf497e5-23f0-41a0-89be-b778692e41ba}</Project>
+      <Name>nnunet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Projects\variandb\variandb.csproj">
+      <Project>{a78bc43e-ca46-4ad5-b078-e46db7025ead}</Project>
+      <Name>variandb</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

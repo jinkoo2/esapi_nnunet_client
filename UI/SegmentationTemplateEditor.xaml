@@ -63,8 +63,11 @@
                 <DataGridCheckBoxColumn Header="High Resolution" Binding="{Binding HighResolution}" Width="100"/>
 
                 <DataGridTextColumn Header="Mode Idl" Binding="{Binding ModelId}" />
-                <DataGridTextColumn Header="Model Label" Binding="{Binding ModelLabel}" Width="100"/>
+                <DataGridTextColumn Header="Model Label" Binding="{Binding ModelLabelName}" Width="100"/>
+
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
                 
+
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

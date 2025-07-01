@@ -8,7 +8,8 @@
       "Color": "#FF0000",
       "HighResolution": false,
       "ModelId": "Dataset015_CBCTBladderRectumBowel2.lowres",
-      "ModelLabel": "bladder"
+      "ModelLabelName": "bladder",
+      "ModelLabelNumber": 1
     },
     {
       "Id": "Rectum",
@@ -16,7 +17,8 @@
       "Color": "#FFFF00",
       "HighResolution": false,
       "ModelId": "Dataset015_CBCTBladderRectumBowel2.lowres",
-      "ModelLabel": "rectum"
+      "ModelLabelName": "rectum",
+      "ModelLabelNumber": 2
     },
     {
       "Id": "Bowel",
@@ -24,7 +26,8 @@
       "Color": "#00FFFF",
       "HighResolution": false,
       "ModelId": "Dataset015_CBCTBladderRectumBowel2.lowres",
-      "ModelLabel": "bowel"
+      "ModelLabelName": "bowel",
+      "ModelLabelNumber": 3
     }
   ]
 }
