@@ -1,4 +1,5 @@
-﻿using System;
+﻿using nnunet_client.viewmodels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,20 +13,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using nnunet_client.viewmodels; // Added the namespace for your view model
 
-namespace nnunet_client
+namespace nnunet_client.views
 {
     /// <summary>
-    /// Interaction logic for SimplePrescriptionWindow.xaml
+    /// Interaction logic for DoseLimitListEditorControl.xaml
     /// </summary>
-    public partial class DoseLimitEditorWindow : Window
+    public partial class DoseLimitListEditorControl : UserControl
     {
-        public DoseLimitEditorWindow()
+        public DoseLimitListEditorControl()
         {
             InitializeComponent();
-
-            this.DataContext = new DoseLimitListEditorControlViewModel();
         }
     }
 }

@@ -18,6 +18,7 @@ namespace nnunet_client.viewmodels
     using System.Windows.Input;
     using System.Windows.Shapes;
 
+    [JsonObject(MemberSerialization.OptIn)] // only include explicitly marked properties
     public class PrescriptionListViewModel : INotifyPropertyChanged
     {
 
@@ -30,6 +31,7 @@ namespace nnunet_client.viewmodels
 
 
         private ObservableCollection<Prescription> _prescriptions;
+        [JsonProperty]  // ✅ include in JSON
         public ObservableCollection<Prescription> Prescriptions
         {
             get => _prescriptions;
@@ -41,6 +43,7 @@ namespace nnunet_client.viewmodels
         }
 
         private Prescription _selectedPrescription;
+        [JsonIgnore]  // not include in JSON
         public Prescription SelectedPrescription
         {
             get => _selectedPrescription;
@@ -61,11 +64,11 @@ namespace nnunet_client.viewmodels
         public PrescriptionListViewModel()
         {
             Prescriptions = new ObservableCollection<Prescription>();
-            Prescriptions.Add(new Prescription { Id = "Default", TotalDose = 3000 });
+            //Prescriptions.Add(new Prescription { Id = "Default", TotalDose = 3000 });
 
             // Initialize commands, linking them to the logic methods.
-            LoadCommand = new RelayCommand(LoadPrescriptions);
-            SaveCommand = new RelayCommand(SavePrescriptions);
+            LoadCommand = new RelayCommand(Load);
+            SaveCommand = new RelayCommand(Save);
 
             // 🎯 Initialize the new commands
             AddCommand = new RelayCommand(AddPrescription);
@@ -94,25 +97,31 @@ namespace nnunet_client.viewmodels
             return SelectedPrescription != null;
         }
 
-        private void LoadPrescriptions()
+
+
+        private void Load()
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+            
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+
+                
+
 
             if (openFileDialog.ShowDialog() == true)
             {
                 try
                 {
-                    Console.WriteLine("Loading from:" + openFileDialog.FileName);
+                   
 
                     string json = File.ReadAllText(openFileDialog.FileName);
-                    var loadedPrescriptions = JsonConvert.DeserializeObject<ObservableCollection<Prescription>>(json);
+                    PrescriptionListViewModel data = JsonConvert.DeserializeObject<PrescriptionListViewModel>(json);
 
                     // Clear the existing list and add the loaded items.
                     Prescriptions.Clear();
-                    if (loadedPrescriptions != null)
+                    if (data.Prescriptions != null)
                     {
-                        foreach (var p in loadedPrescriptions)
+                        foreach (var p in data.Prescriptions)
                         {
                             Prescriptions.Add(p);
                         }
@@ -126,27 +135,24 @@ namespace nnunet_client.viewmodels
             }
         }
 
-        private void SavePrescriptions()
+        public void Save()
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
-            saveFileDialog.FileName = "prescriptions"; // Default file name
+
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                saveFileDialog.FileName = "doselimits";
+
+               
             if (saveFileDialog.ShowDialog() == true)
             {
                 try
                 {
-                    // Serialize to JSON
-                    var json = JsonConvert.SerializeObject(Prescriptions, Formatting.Indented);
-
-                    // Save to file
+                    var json = JsonConvert.SerializeObject(this, Formatting.Indented);
                     System.IO.File.WriteAllText(saveFileDialog.FileName, json);
-
-                    Console.WriteLine("Saved:" + saveFileDialog.FileName);
                 }
                 catch (Exception ex)
                 {
-                    // Handle potential errors during file writing or serialization.
-                    Console.WriteLine($"Error saving prescriptions: {ex.Message}");
+                    Console.WriteLine($"Error saving dose limits: {ex.Message}");
                 }
             }
         }

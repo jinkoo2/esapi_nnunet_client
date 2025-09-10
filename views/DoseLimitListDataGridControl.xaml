@@ -6,7 +6,7 @@
              xmlns:models="clr-namespace:nnunet_client.models"
              xmlns:System="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="400"
+             d:DesignHeight="1000" d:DesignWidth="1000"
              x:Name="rootControl">
              
 
@@ -15,8 +15,6 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
-
 
         <DataGrid Grid.Row="0"
                   ItemsSource="{Binding DoseLimits}"
@@ -45,7 +43,7 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
-                
+                <!-- no contour type for now... not sure where it is used...
                 <DataGridTemplateColumn Header="Contour Type">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -61,7 +59,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-
+                -->
                 <DataGridTemplateColumn Header="Prescription">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -126,12 +124,36 @@
                     Grid.Column="9" Margin="5"/>
             </Grid>
 
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- TextBlock auto-size -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- TextBox takes remaining space -->
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Notes:" VerticalAlignment="Center"/>
+
+                <TextBox Grid.Column="1"
+         Text="{Binding Comments, Mode=TwoWay}" 
+         Margin="10"
+         Padding="5"
+         AcceptsReturn="True"
+         TextWrapping="Wrap"
+         VerticalScrollBarVisibility="Auto"
+         HorizontalScrollBarVisibility="Auto"
+         VerticalAlignment="Stretch"
+         Height="30"/>
+                
+            </Grid>
+            
+
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="Add"
+                <Button Content="Add Item"
                         Command="{Binding AddCommand}"
                         Width="75"
                         Margin="5"/>
-                <Button Content="Remove"
+                <Button Content="Remove Item"
                         Command="{Binding RemoveCommand}"
                         Width="75"
                         Margin="5"/>

@@ -102,6 +102,7 @@
     <Compile Include="ART.xaml.cs">
       <DependentUpon>ART.xaml</DependentUpon>
     </Compile>
+    <Compile Include="viewmodels\DoseLimitListEditorControlViewModel.cs" />
     <Compile Include="viewmodels\DoseLimitListViewModel.cs" />
     <Compile Include="viewmodels\RelayCommand.cs" />
     <Compile Include="views\AutoContourControl.xaml.cs">
@@ -115,6 +116,9 @@
     </Compile>
     <Compile Include="views\DoseLimitListDataGridControl.xaml.cs">
       <DependentUpon>DoseLimitListDataGridControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="views\DoseLimitListEditorControl.xaml.cs">
+      <DependentUpon>DoseLimitListEditorControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="views\LogFileViewControl.xaml.cs">
       <DependentUpon>LogFileViewControl.xaml</DependentUpon>
@@ -160,6 +164,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="views\DoseLimitListDataGridControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\DoseLimitListEditorControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

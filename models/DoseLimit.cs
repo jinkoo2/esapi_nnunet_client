@@ -40,12 +40,15 @@ namespace nnunet_client.models
             set => SetProperty(ref _contour, value);
         }
 
-        private DoseLimitContourType _contourType;
-        public DoseLimitContourType ContourType
-        {
-            get => _contourType;
-            set => SetProperty(ref _contourType, value);
-        }
+        /// <summary>
+        ///  hiding for now, not sure where it is being used....
+        /// </summary>
+        //private DoseLimitContourType _contourType;
+        //public DoseLimitContourType ContourType
+        //{
+        //    get => _contourType;
+        //    set => SetProperty(ref _contourType, value);
+        //}
 
         private Prescription _prescription;
         public Prescription Prescription
@@ -80,6 +83,11 @@ namespace nnunet_client.models
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public override string ToString()
+        {
+            return $"{Id}";
         }
     }
 }

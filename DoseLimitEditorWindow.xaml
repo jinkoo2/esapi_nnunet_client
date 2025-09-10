@@ -6,41 +6,12 @@
         xmlns:views="clr-namespace:nnunet_client.views"
         xmlns:viewmodels="clr-namespace:nnunet_client.viewmodels"
         mc:Ignorable="d"
-        Title="Dose Limit List" Height="450" Width="800">
+        Title="Dose Limit List" Height="450" Width="800"
+        FontFamily="Arial" FontSize="12">
+
 
     <Window.Resources>
     </Window.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-                     
-        <TextBlock Grid.Row="0"
-                   FontWeight="Bold"
-                   FontSize="16"
-                   HorizontalAlignment="Center"
-                   Margin="0,5,0,5">Prescriptions</TextBlock>
-
-        <views:PrescriptionListDataGridControl 
-            x:Name="prescriptionListDataGridControl"
-            Width="300"
-            Grid.Row="1" 
-            />
-
-        <TextBlock Grid.Row="2"
-                   FontWeight="Bold"
-                   FontSize="16"
-                   HorizontalAlignment="Center"
-                   Margin="0,5,0,5">Dose Limits</TextBlock>
-
-        <views:DoseLimitListDataGridControl 
-            x:Name="doseLimitListDataGridControl"
-            Grid.Row="3"
-            />
-    </Grid>
+    <views:DoseLimitListEditorControl Margin="10"/>
 </Window>
