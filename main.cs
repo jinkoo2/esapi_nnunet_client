@@ -69,12 +69,17 @@ namespace nnunet_client
             TemplateManager templateManager = new TemplateManager();
             templateManager.LoadTemplates(templateDir);
 
-
-
             var wpfApp = new System.Windows.Application();
 
-            var window = new ART(vmsApp);
+            var window = new nnunet_client.DoseLimitEditorWindow();
             wpfApp.Run(window);
+
+
+            //var window = new nnunet_client.views.ConstraintSetEditorWindow();
+            //wpfApp.Run(window);
+
+            //var window = new ART(vmsApp);
+            //wpfApp.Run(window);
 
             Console.WriteLine("done");
         }

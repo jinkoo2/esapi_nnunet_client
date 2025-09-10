@@ -84,25 +84,54 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="bladder_art.cs" />
+    <Compile Include="ConstraintSet.cs" />
     <Compile Include="filesystem.cs" />
     <Compile Include="global.cs" />
     <Compile Include="helper.cs" />
+    <Compile Include="models\Contour.cs" />
+    <Compile Include="models\DoseLimit.cs" />
+    <Compile Include="models\Person.cs" />
+    <Compile Include="models\Prescription.cs" />
     <Compile Include="piduuid.cs" />
+    <Compile Include="DoseLimitEditorWindow.xaml.cs">
+      <DependentUpon>DoseLimitEditorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TemplateManager.cs" />
     <Compile Include="SegmentationTemplate.cs" />
     <Compile Include="main.cs" />
     <Compile Include="ART.xaml.cs">
       <DependentUpon>ART.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\AutoContourControl.xaml.cs">
+    <Compile Include="viewmodels\DoseLimitListViewModel.cs" />
+    <Compile Include="viewmodels\RelayCommand.cs" />
+    <Compile Include="views\AutoContourControl.xaml.cs">
       <DependentUpon>AutoContourControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\AutoPlanControl.xaml.cs">
+    <Compile Include="views\AutoPlanControl.xaml.cs">
       <DependentUpon>AutoPlanControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\SegmentationTemplateEditor.xaml.cs">
+    <Compile Include="views\ConstraintSetEditorControl.xaml.cs">
+      <DependentUpon>ConstraintSetEditorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="views\DoseLimitListDataGridControl.xaml.cs">
+      <DependentUpon>DoseLimitListDataGridControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="views\LogFileViewControl.xaml.cs">
+      <DependentUpon>LogFileViewControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="views\LogViewControl.xaml.cs">
+      <DependentUpon>LogViewControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="views\PrescriptionListComboBoxControl.xaml.cs">
+      <DependentUpon>PrescriptionListComboBoxControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="views\PrescriptionListDataGridControl.xaml.cs">
+      <DependentUpon>PrescriptionListDataGridControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="views\SegmentationTemplateEditor.xaml.cs">
       <DependentUpon>SegmentationTemplateEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="viewmodels\PrescriptionListViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -114,15 +143,43 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UI\AutoContourControl.xaml">
+    <Page Include="DoseLimitEditorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UI\AutoPlanControl.xaml">
+    <Page Include="views\AutoContourControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UI\SegmentationTemplateEditor.xaml">
+    <Page Include="views\AutoPlanControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\ConstraintSetEditorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\DoseLimitListDataGridControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\LogFileViewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\LogViewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\PrescriptionListComboBoxControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\PrescriptionListDataGridControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\SegmentationTemplateEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -143,6 +200,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="_data\doselimit\templates\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -16,7 +16,7 @@ using VMSSeries = VMS.TPS.Common.Model.API.Series;
 using VMSRegistration = VMS.TPS.Common.Model.API.Registration;
 using VMSReferencePoint = VMS.TPS.Common.Model.API.ReferencePoint;
 using VMSHospital = VMS.TPS.Common.Model.API.Hospital;
-using nnunet_client.UI;
+using nnunet_client.views;
 
 namespace nnunet_client
 {
@@ -49,6 +49,7 @@ namespace nnunet_client
                     global.vmsPatient = null;
 
                     Patient pt = esapiApp.OpenPatientById(id);
+                    helper.log($"Opened patient: {pt.LastName},{pt.FirstName},{pt.Id} ");
                     global.vmsPatient = pt;
 
                     // set to patient contorl
@@ -59,19 +60,19 @@ namespace nnunet_client
                     ImageListControl.SetImages(allImages3D);
 
 
-                    AutoPlanControl.SetPatient(pt);
+                    AutoPlanControl.Patient = pt;
 
+                    helper.log($"Now... select an image...");
                 }
             };
-
 
             // patient selected
             ImageListControl.SelectedItemChanged += (object sender, VMSImage selectedImage) =>
             {
-                MessageBox.Show("You selected: " + selectedImage.Id);
+                helper.log($"You selected: {selectedImage.Id}");
 
                 AutoSegControl.SetImage(selectedImage);
-                AutoPlanControl.SetImage(selectedImage);
+                AutoPlanControl.Image = selectedImage;
 
                 // check image is tilted (acquired non-zero angle)
                 double direction00 = selectedImage.XDirection[0];
@@ -81,8 +82,27 @@ namespace nnunet_client
                 if (prod < 0.9999)
                 {
                     MessageBox.Show("Image is tilted (acquired at non-zero couch angle(s)! A plan cannot be added on a tilted image!");
+                    return;
                 }
             };
+
+            // log view controller
+            //Logger.StartMonitoring(null);
+            Logger.StartLogPolling(null);
+            helper.Logger = Logger;
+
+            helper.log("Now...select a patient...");
+            
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            if (global.vmsPatient != null)
+            {
+                global.vmsApplication.ClosePatient();
+            }
+
+            Logger.StopLogPolling();
         }
     }
 }

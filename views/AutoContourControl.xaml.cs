@@ -24,7 +24,7 @@ using VMSStructure = VMS.TPS.Common.Model.API.Structure;
 using VMSStructureSet = VMS.TPS.Common.Model.API.StructureSet;
 using VMSStudy = VMS.TPS.Common.Model.API.Study;
 
-namespace nnunet_client.UI
+namespace nnunet_client.views
 {
     public partial class AutoContourControl : UserControl
     {

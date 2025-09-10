@@ -38,8 +38,14 @@ namespace nnunet_client
 {
     public static class bladder_art
     {
-        static VMS.TPS.Common.Model.API.Application _vmsApp = null;
+        static VMS.TPS.Common.Model.API.Application vmsApp { get {
+                return global.vmsApplication;
+            } set { 
+            global.vmsApplication = value;
+            } }
 
+
+        private static IProgress<string> Progress = null;
 
 
         private static void _err(string msg)
@@ -48,17 +54,10 @@ namespace nnunet_client
             throw new Exception(msg);
         }
 
-
         private static void _info(string msg)
         {
             Console.WriteLine(msg);
-
-            if (_log_file != null)
-            {
-                DateTime t = DateTime.Now;
-                msg = string.Format("[{0}-{1}-{2} {3}:{4}] {5}", t.Year, t.Month, t.Day, t.Hour, t.Minute, msg);
-                filesystem.appendline(_log_file, msg);
-            }
+            helper.log(msg);
         }
 
         public static void crop_by_body2(VMS.TPS.Common.Model.API.Structure s, double body_inner_margin_mm, VMS.TPS.Common.Model.API.StructureSet sset)
@@ -80,7 +79,7 @@ namespace nnunet_client
         private static string _log_file=null;
         public static void make_cbct_art_plans_3mm(VMS.TPS.Common.Model.API.Application app)
         {
-            _vmsApp = app;
+            vmsApp = app;
             global.data_root_secure = @"G:\data_secure";
             global.make_export_log = false; // do not make export_log.
 
@@ -176,7 +175,7 @@ namespace nnunet_client
 
         public static void copy_beams_and_cal_dose_for_plans(VMS.TPS.Common.Model.API.Application app)
         {
-            _vmsApp = app;
+            vmsApp = app;
 
             string plan_src = "plan0_ct";
             string plan_dst = "plan0_set1";
@@ -220,7 +219,7 @@ namespace nnunet_client
     )
         {
             _info($"copy_beams_and_cal_dose(): pid={pid}, cs_id={cs_id}, plan_src={plan_src}, plan_dst={plan_dst}");
-            Patient pt = _vmsApp.OpenPatientById(pid);
+            Patient pt = vmsApp.OpenPatientById(pid);
             if (pt == null)
             {
                 _err($"Patient(Id={pid}) not found");
@@ -298,18 +297,18 @@ namespace nnunet_client
             ps_dst.CalculateDoseWithPresetValues(ms_src);
             
            
-            _vmsApp.SaveModifications();
+            vmsApp.SaveModifications();
 
 
             
-            _vmsApp.ClosePatient();
+            vmsApp.ClosePatient();
         }
 
         
 
         public static void change_rx_of_art_plan(VMS.TPS.Common.Model.API.Application app)
         {
-            _vmsApp = app;
+            vmsApp = app;
 
             string[] plan_ids = new string[] { "art2_3mm_set1", "art2_5mm_set1", "art2_1cm_set1", "plan0_set1" };
 
@@ -357,7 +356,7 @@ namespace nnunet_client
             )
         {
             _info($"set_plan_rx(): pid={pid}, cs_id={cs_id}, ps_id={ps_id}, num_fxs={num_fxs}, dose_per_fx={dose_per_fx}, total_dose={num_fxs * dose_per_fx}");
-            Patient pt = _vmsApp.OpenPatientById(pid);
+            Patient pt = vmsApp.OpenPatientById(pid);
             if (pt == null)
             {
                 _err($"Patient(Id={pid}) not found");
@@ -383,13 +382,13 @@ namespace nnunet_client
             //new_ps.SetPrescription(ps.NumberOfFractions??0, ps.DosePerFraction, ps.TreatmentPercentage);
             ps.SetPrescription(num_fxs, new DoseValue(dose_per_fx, DoseValue.DoseUnit.cGy), 1.0);
 
-            _vmsApp.SaveModifications();
-            _vmsApp.ClosePatient();
+            vmsApp.SaveModifications();
+            vmsApp.ClosePatient();
         }
 
         public static void create_plan0_ct_plans(VMS.TPS.Common.Model.API.Application app)
         {
-            _vmsApp = app;
+            vmsApp = app;
 
             //make_cbct_art_plans_3mm(app);
 
@@ -414,7 +413,7 @@ namespace nnunet_client
 
         public static void create_3mm_5mm_10mm_art_plans(VMS.TPS.Common.Model.API.Application app)
         {
-            _vmsApp = app;
+            vmsApp = app;
 
             //make_cbct_art_plans_3mm(app);
 
@@ -493,7 +492,7 @@ namespace nnunet_client
 
                 _info($"pid={pid}");
 
-                Patient pt = _vmsApp.OpenPatientById(pid);
+                Patient pt = vmsApp.OpenPatientById(pid);
 
                 if (pt == null)
                 {
@@ -506,7 +505,7 @@ namespace nnunet_client
                 if (plan == null)
                 {
                     _info($"plan not found ({plan_id}).");
-                    _vmsApp.ClosePatient();
+                    vmsApp.ClosePatient();
                     continue;
                 }
 
@@ -516,7 +515,7 @@ namespace nnunet_client
 
                 filesystem.appendline(result_csv, out_line);
 
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
             }
 
             _info("done.");
@@ -606,7 +605,7 @@ namespace nnunet_client
                     if (ps == null)
                     {
                         _info($"plan({art_plan}) not found for {pt.Id}.");
-                        _vmsApp.ClosePatient();
+                        vmsApp.ClosePatient();
 
                         // clear out_line
                         out_line = "";
@@ -793,7 +792,7 @@ namespace nnunet_client
 
             _info($"pid={pid}");
 
-            Patient pt = _vmsApp.OpenPatientById(pid);
+            Patient pt = vmsApp.OpenPatientById(pid);
             if (pt == null)
             {
                 _err($"Patient(Id={pid}) not found");
@@ -804,7 +803,7 @@ namespace nnunet_client
             if (ps == null)
             {
                 _err($"plan not found:{pid}->({ps_id}. skipping...");
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 return;
             }
 
@@ -871,14 +870,14 @@ namespace nnunet_client
             Structure s_bowel = find_or_add_s("ORGAN", "bowel_sum", sset);
             s_bowel.SegmentVolume = sv_bowel;
 
-            _vmsApp.SaveModifications();
+            vmsApp.SaveModifications();
 
 
             /////////////////////
             //// rectum + bowel
             Structure s_rectumbowel = find_or_add_s("ORGAN", "rectumbowel", sset);
             s_rectumbowel.SegmentVolume = s_rectum.SegmentVolume.Or(s_bowel.SegmentVolume);
-            _vmsApp.SaveModifications();
+            vmsApp.SaveModifications();
 
 
             /////////
@@ -909,7 +908,7 @@ namespace nnunet_client
 
             crop_by_body2(s_ptv, body_inner_margin_for_crop, sset); // cut ptv by body
 
-            _vmsApp.SaveModifications();
+            vmsApp.SaveModifications();
 
             ///////////////////////////////////////////////////
             //// rectumbowel_m_bladder = rectum_bowel - bladder
@@ -950,7 +949,7 @@ namespace nnunet_client
                 os.RemoveObjective(obj);
             }
 
-            _vmsApp.SaveModifications();
+            vmsApp.SaveModifications();
 
 
             OptimizationNormalTissueParameter nto = os.AddAutomaticNormalTissueObjective(100);
@@ -989,7 +988,7 @@ namespace nnunet_client
                 "" //string mlcId
             );
 
-            _vmsApp.SaveModifications();
+            vmsApp.SaveModifications();
 
             helper.log("optimizing...");
             Stopwatch stopwatch = new Stopwatch();
@@ -1015,7 +1014,7 @@ namespace nnunet_client
 
             if (!opt_result.Success)
             {
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 _err($"Optimization Failed: opt_result.ToString()");
             }
 
@@ -1044,11 +1043,11 @@ namespace nnunet_client
 
             if (!lmc_result.Success)
             {
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 _err("LMC Calculation Failed");
             }
 
-            _vmsApp.SaveModifications();
+            vmsApp.SaveModifications();
 
             // Dose
             helper.log("calculating dose....");
@@ -1059,12 +1058,12 @@ namespace nnunet_client
 
             if (!dose_result.Success)
             {
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 _err("Dose Calculation Failed");
             }
 
-            _vmsApp.SaveModifications();
-            _vmsApp.ClosePatient();
+            vmsApp.SaveModifications();
+            vmsApp.ClosePatient();
 
             // create a copy plan 
             //{
@@ -1089,39 +1088,18 @@ namespace nnunet_client
             helper.log("done.");
         }
 
-        public static void make_ptv_and_opti_contours(VMSPatient pt, VMSStructureSet sset, VMSImage ct,
-            string bladder_id, string rectum_id, string bowel_id, double crop_by_body_inner_margin, double ptv_margin1_all, double ptv_margin2_inf, string ptv_id, Color ptv_color,
-            string opti_rectum_id, string opti_bowel_id)
+        public static VMSStructure make_ptv(VMSPatient pt, VMSStructureSet sset, VMSImage ct,
+            VMSStructure s_bladder, VMSStructure s_rectum, VMSStructure s_bowel, double crop_by_body_inner_margin, double ptv_margin1_all, double ptv_margin2_inf, string ptv_id, Color ptv_color)
         {
-            helper.log($"make_ptv_and_opti_contours()");
+            helper.log($"make_ptv()");
 
-            //////////////////////////
-            /// s_ctv is the bladder
-            Structure s_ctv = s_of_id(bladder_id, sset);
-            if (s_ctv == null)
-            {
-                _err($"Structure(Id={bladder_id}) not found");
-            }
+            /////////////////////////////////
+            /// bladder (ctv), rectum, bowel
+            Structure s_ctv = s_bladder;
             helper.print($"CTV={s_ctv.Id}");
-
-
-            ///////////
-            /// rectum 
-            Structure s_rectum = s_of_id(rectum_id, sset);
-            if (s_rectum == null)
-            {
-                _err($"Structure(Id={rectum_id}) not found");
-            }
             helper.print($"s_rectum={s_rectum.Id}");
-
-            ///////////
-            /// bowel
-            Structure s_bowel = s_of_id(bowel_id, sset);
-            if (s_bowel == null)
-            {
-                _err($"Structure(Id={bowel_id}) not found");
-            }
-            helper.print($"s_bowel={s_bowel.Id}");
+            helper.print($"s_bowel{s_bowel.Id}");
+            helper.print($"s_bladder={s_bladder.Id}");
 
             /////////////////
             // rectum + bowel
@@ -1172,12 +1150,20 @@ namespace nnunet_client
             s_ptv.SegmentVolume = s_ptv.SegmentVolume.Sub(s_rectumbowel.SegmentVolume);
             helper.print($"Subtracted rectumbowel from PTV.");
 
+            return s_ptv;
+        }
+
+        public static (Structure s_opti_rectum, Structure s_opti_bowel) make_opti_contours(VMSStructureSet sset, VMSStructure s_ptv, VMSStructure s_rectum, VMSStructure s_bowel, 
+            string opti_rectum_id, string opti_bowel_id)
+        {
+            helper.log($"make_ptv_and_opti_contours()");
+
             // ptv+3cm
             SegmentVolume sv_ptv_3cm = s_ptv.SegmentVolume.Margin(30.0);
 
             ////////////////
             // _opti_rectum
-            Structure s_opti_rectum = find_or_add_s("ORGAN",  opti_rectum_id, sset);
+            Structure s_opti_rectum = find_or_add_s("ORGAN", opti_rectum_id, sset);
             s_opti_rectum.SegmentVolume = sv_ptv_3cm.And(s_rectum.SegmentVolume);
             helper.print($"Created {s_opti_rectum.Id}.");
 
@@ -1186,36 +1172,50 @@ namespace nnunet_client
             Structure s_opti_bowel = find_or_add_s("ORGAN", opti_bowel_id, sset);
             s_opti_bowel.SegmentVolume = sv_ptv_3cm.And(s_bowel.SegmentVolume);
             helper.print($"Created {s_opti_bowel.Id}.");
+
+            return (s_opti_rectum, s_opti_bowel);
         }
 
-        public static void create_bladder_plan3(
-            string pid,
-            string image_id,
-            string image_FOR,
-            string bladder_id,
-            string rectum_bowel_id,
-            int ptv_margin_mm,
-            double[] Gs,
-            string cs_id,
+        public static async Task create_bladder_plan3(
+            VMSPatient pt,
+            VMSStructureSet sset,
+            VMSCourse course,
             string ps_id,
+            string ptv_id,
+            string bladder_id,
+            string rectum_id,
+            string opti_rectum_id, 
+            string bowel_id,
+            string opti_bowel_id,
             int num_fxs = 20,
             double dose_per_fx = 275.0
             )
         {
-            _info($"pid={pid}, ps_id={ps_id}");
+            _info("create_bladder_plan3()");
 
-            Patient pt = _vmsApp.OpenPatientById(pid);
             if (pt == null)
             {
-                _err($"Patient(Id={pid}) not found");
+                _err($"Patient(Id={pt.Id}) is invalid");
+                return;
             }
 
-            VMS.TPS.Common.Model.API.Image ct = image_of_id_FOR(image_id, image_FOR, pt);
-            //VMS.TPS.Common.Model.API.Image ct = first_image_of_id(image_id, pt);
+            if (sset == null)
+            {
+                _err($"StructureSet (Id={sset.Id}) is invalid");
+                return;
+            }
 
+            VMSImage ct = sset.Image;
             if (ct == null)
             {
-                _err($"image not found:{pid}->({image_id},{image_FOR}). skipping...");
+                _err($"ct (Id={ct.Id}) is invalid");
+                return;
+            }
+
+            if (course == null)
+            {
+                _err($"Course (Id={course.Id}) is invalid");
+                return;
             }
 
             double direction00 = ct.XDirection[0];
@@ -1225,84 +1225,75 @@ namespace nnunet_client
             if (prod < 0.9999)
             {
                 _err($"Image Tilted! direction product = {prod}");
-            }
-
-
-
-            if (ct.Series.ImagingDeviceId == null || ct.Series.ImagingDeviceId == "")
-                ct.Series.SetImagingDevice("CTAWP96967");
-
-            double total_dose = num_fxs * dose_per_fx;
-
-            StringBuilder sb = new StringBuilder();
-            //string sset_id = image_id; // image ID and structureset ID are same
-
-            Color ptv_color = Color.FromRgb(255, 0, 0);
-            double body_inner_margin_for_crop = 5.0;
-
-            string ptv_Id = $"ptv_bldr_{ptv_margin_mm}mm";
-
-            ExternalBeamMachineParameters machine = new ExternalBeamMachineParameters("SIL 21IX", "6X", 600, "STATIC", "");
-
-            // check if the plan exists
-            if (cs_of_id(cs_id, pt) != null && ps_of_id(ps_id, pt) != null)
-            {
-                _info($"plan already exists: {pt.Id}->{cs_id}->{ps_id}. skipping...");
-                _vmsApp.ClosePatient();
                 return;
             }
 
+            double total_dose = num_fxs * dose_per_fx;
 
-            pt.BeginModifications();
+            ExternalBeamMachineParameters machine = new ExternalBeamMachineParameters("SIL 21IX", "6X", 600, "STATIC", "");
 
-            ///////
-            // sset
-            StructureSet[] sset_list = sset_list_of_image_id_FOR(image_id, image_FOR, pt).ToArray();
-            if (sset_list.Length == 0)
+            
+            // set default imaging device
+            if (ct.Series.ImagingDeviceId == null || ct.Series.ImagingDeviceId == "")
+                ct.Series.SetImagingDevice("CTAWP96967");
+
+            //////////////
+            /// ptv
+            Structure s_ptv = s_of_id(ptv_id, sset);
+            if (s_ptv == null)
             {
-                _err($"StructureSet not found!");
+                _err($"Structure(Id={s_ptv}) not found");
             }
-            StructureSet sset = sset_list[0];
+            _info($"s_ptv={s_ptv.Id}");
 
-            if (sset.Image.Series.ImagingDeviceId == null || sset.Image.Series.ImagingDeviceId == "")
-                sset.Image.Series.SetImagingDevice("CTAWP96967");
 
-            //////////////////////////
-            /// s_ctv is the bladder
-            Structure s_ctv = s_of_id(bladder_id, sset);
-            if (s_ctv == null)
+            //////////////
+            /// bladder
+            Structure s_bladder = s_of_id(bladder_id, sset);
+            if (s_bladder == null)
             {
                 _err($"Structure(Id={bladder_id}) not found");
             }
-            sb.Append($",{s_ctv.Id}");
+            _info($"s_ctv={s_bladder.Id}");
 
-            ///////////////////////
-            /// rectum bowel
-            Structure s_rectumbowel = s_of_id(rectum_bowel_id, sset);
-            if (s_rectumbowel == null)
+            ////////////
+            /// rectum 
+            Structure s_rectum = s_of_id(rectum_id, sset);
+            if (s_rectum == null)
             {
-                _err($"Structure(Id={rectum_bowel_id}) not found");
+                _err($"Structure(Id={rectum_id}) not found");
             }
-            sb.Append($",{rectum_bowel_id}");
+            _info($"s_rectum={s_rectum.Id}");
 
+            ////////////
+            /// bowel
+            Structure s_bowel = s_of_id(bowel_id, sset);
+            if (s_bowel == null)
+            {
+                _err($"Structure(Id={rectum_id}) not found");
+            }
+            _info($"s_bowel={s_bowel.Id}");
 
+           
             ///////////////////////
             /// rectum for opti
-            Structure s_opti_rectum = find_or_add_s("ORGAN", "_opti_rectum", sset);
+            Structure s_opti_rectum = find_or_add_s("ORGAN", opti_rectum_id, sset);
             if (s_opti_rectum == null)
             {
                 _err($"Structure(Id=_opti_rectum) not found");
+                return;
             }
-            AxisAlignedMargins margin_post_5cm = new AxisAlignedMargins(StructureMarginGeometry.Outer, 0, 0, 0, 0, 50, 0);
-            SegmentVolume sv_10cm = s_ctv.SegmentVolume.AsymmetricMargin(margin_post_5cm).AsymmetricMargin(margin_post_5cm); // bladder + 10cm post
-            SegmentVolume sv_opti_rectum = s_rectumbowel.SegmentVolume.And(sv_10cm); // rectum opti = recturm bladder in the bladder + 10cm post
-            SegmentVolume sv_2cm = s_ctv.SegmentVolume.Margin(20.0); // bladder + 2cm
-            s_opti_rectum.SegmentVolume = sv_opti_rectum.Sub(sv_2cm); // rectum opti = rectum opti - (bladder + 2cm)
+            _info($"s_opti_rectum={s_opti_rectum.Id}");
 
-
-            sb.Append($",_opti_rectum");
-
-            _vmsApp.SaveModifications();
+            ///////////////////////
+            /// bowel for opti
+            Structure s_opti_bowel = find_or_add_s("ORGAN", opti_bowel_id, sset);
+            if (s_opti_bowel == null)
+            {
+                _err($"Structure(Id=_opti_bowel) not found");
+                return;
+            }
+            _info($"s_opti_bowel={s_opti_bowel.Id}");
 
             /////////
             /// Body
@@ -1313,44 +1304,28 @@ namespace nnunet_client
                 SearchBodyParameters sbparam = sset.GetDefaultSearchBodyParameters();
                 s_body = sset.CreateAndSearchBody(sbparam);
             }
+            _info($"s_body={s_body.Id}");
 
-            ////////
-            // PTV
-            Structure s_ptv = find_or_add_s("PTV", ptv_Id, sset);
-            if (s_ptv == null)
+            int num_beams = 7;
+            int gantr_interval = 50;
+            int gantry_start = 180 + 50 / 2;
+            double[] Gs = new double[num_beams];
+            for (int g = 0; g < num_beams; g++)
             {
-                _err($"Could not find or add structure(Id={ptv_Id})");
+                double gantry_angle = gantry_start + gantr_interval * g;
+                if (gantry_angle >= 360)
+                    gantry_angle -= 360;
+
+                Gs[g] = gantry_angle;
             }
-            s_ptv.Color = ptv_color;
-            sb.Append($",{s_ptv.Id}");
 
-            // ptv = ctv + margin_mm
-            s_ptv.SegmentVolume = s_ctv.SegmentVolume.Margin(ptv_margin_mm);
-            sb.Append($",{ptv_margin_mm}");
-
-
-            crop_by_body2(s_ptv, body_inner_margin_for_crop, sset);
-
-            ///////////////////////////////////////////////////
-            //// rectumbowel_m_bladder = rectum_bowel - bladder
-            Structure s_rectumbowel_m_bladder = find_or_add_s("ORGAN", "rectumbowel_m_bladder", sset);
-            s_rectumbowel_m_bladder.SegmentVolume = s_rectumbowel.SegmentVolume.Sub(s_ctv.SegmentVolume);
-
-            ///////////////////////////
-            // rectum_bowel for opti = s_rectumbowel_m_bladder and ptv+3cm
-            Structure s_opti_rectumbowel = find_or_add_s("ORGAN", "_opti_rectumbowel", sset);
-            s_opti_rectumbowel.SegmentVolume = s_ptv.SegmentVolume.Margin(30.0).And(s_rectumbowel_m_bladder.SegmentVolume);
-
-            ///////////////////////////////////////
-            /// subtract rectumbowel from the ptv
-            /// ptv = ptv - rectumbowel_m_bladder
-            s_ptv.SegmentVolume = s_ptv.SegmentVolume.Sub(s_rectumbowel_m_bladder.SegmentVolume);
-
-            Course cs = find_or_add_cs(cs_id, pt);
-            if (cs == null)
-                _err($"Course(Id={cs_id}) not found nor create it.");
-
-            ExternalPlanSetup ps = find_or_add_ext_ps(ps_id, sset, cs);
+            ExternalPlanSetup ps = find_or_add_ext_ps(ps_id, sset, course);
+            if (ps == null)
+            {
+                _err($"Plan (Id={ps_id}) - failed to create nor found.");
+                return;
+            }
+            _info($"ps={ps.Id}");
 
             //new_ps.SetPrescription(ps.NumberOfFractions??0, ps.DosePerFraction, ps.TreatmentPercentage);
             ps.SetPrescription(num_fxs, new DoseValue(dose_per_fx, DoseValue.DoseUnit.cGy), 1.0);
@@ -1361,7 +1336,7 @@ namespace nnunet_client
                 double collimatorAngle = 30.0;
                 double gantryAngle = Gs[b_index];
                 double patientSupportAngle = 0.0;
-                VVector isocenter = s_ctv.CenterPoint;
+                VVector isocenter = s_ptv.CenterPoint;
 
                 string b_Id = $"{b_index}";
                 //Beam new_b = new_ps.AddMLCBeam(machine, cpt0.LeafPositions, cpt0.JawPositions, cpt0.CollimatorAngle, cpt0.GantryAngle, cpt0.PatientSupportAngle, b.IsocenterPosition);
@@ -1411,22 +1386,18 @@ namespace nnunet_client
                 os.AddPointObjective(s_ptv, OptimizationObjectiveOperator.Lower, dv_rx, 100.0, 100.0);
                 os.AddPointObjective(s_ptv, OptimizationObjectiveOperator.Upper, dv_rx_110p, 0.0, 100.0);
             }
-            // Rectum Bowel
-            {
-                os.AddPointObjective(s_opti_rectumbowel, OptimizationObjectiveOperator.Upper, dv_rx, 0.0, 100.0);
-            }
-
-            // Rectum Bowel
-            {
-                os.AddPointObjective(s_opti_rectumbowel, OptimizationObjectiveOperator.Upper, dv_rx, 0.0, 100.0);
-                os.AddPointObjective(s_opti_rectumbowel, OptimizationObjectiveOperator.Upper, dv_rx_50p, 50.0, 100.0);
-            }
 
             // Rectum
             {
+                os.AddPointObjective(s_opti_rectum, OptimizationObjectiveOperator.Upper, dv_rx, 0.0, 100.0);
                 os.AddPointObjective(s_opti_rectum, OptimizationObjectiveOperator.Upper, dv_rx_50p, 25.0, 100.0);
             }
 
+            // Bowel
+            {
+                os.AddPointObjective(s_opti_bowel, OptimizationObjectiveOperator.Upper, dv_rx, 0.0, 100.0);
+                os.AddPointObjective(s_opti_bowel, OptimizationObjectiveOperator.Upper, dv_rx_50p, 50.0, 100.0);
+            }
 
             os.AddAutomaticNormalTissueObjective(100.0);
 
@@ -1439,13 +1410,14 @@ namespace nnunet_client
             );
 
 
-            helper.log("optimizing...");
+            _info("optimizing...");
+
             Stopwatch stopwatch = new Stopwatch();
             // intial optimization
             stopwatch.Restart();
             OptimizerResult opt_result = ps.Optimize(optm_Options);
             stopwatch.Stop();
-            helper.log($"finished. It took {(stopwatch.ElapsedMilliseconds / 1000.0 / 60.0).ToString("0.0")} minutes.");
+            _info($"finished. Optimization took {(stopwatch.ElapsedMilliseconds / 1000.0 / 60.0).ToString("0.0")} minutes.");
 
             //// push down rectum bowel slightly 
             //OptimizationOptionsIMRT optm_Options2 = new OptimizationOptionsIMRT(
@@ -1463,30 +1435,29 @@ namespace nnunet_client
 
             if (!opt_result.Success)
             {
-                _vmsApp.ClosePatient();
-                _err($"Optimization Failed: opt_result.ToString()");
+                _err($"Optimization Failed: {opt_result.ToString()}");
+                return;
             }
 
             // LMC
-            helper.log("calculating LMC...");
+            _info("calculating LMC...");
             bool fixedJaw = true;
             LMCVOptions lmc_options = new LMCVOptions(fixedJaw);
 
             stopwatch.Restart();
             CalculationResult lmc_result = ps.CalculateLeafMotions(lmc_options);
             stopwatch.Stop();
-            helper.log($"finished. It took {(stopwatch.ElapsedMilliseconds / 1000.0 / 60.0).ToString("0.0")} minutes.");
+            _info($"finished. LMC calculation took {(stopwatch.ElapsedMilliseconds / 1000.0 / 60.0).ToString("0.0")} minutes.");
 
             if (!lmc_result.Success)
             {
-                _vmsApp.ClosePatient();
+                global.vmsApplication.ClosePatient();
                 _err("LMC Calculation Failed");
             }
 
-            _vmsApp.SaveModifications();
 
             // Dose
-            helper.log("calculating dose....");
+            _info("calculating dose....");
             stopwatch.Restart();
             CalculationResult dose_result = ps.CalculateDose();
             stopwatch.Stop();
@@ -1494,12 +1465,8 @@ namespace nnunet_client
 
             if (!dose_result.Success)
             {
-                _vmsApp.ClosePatient();
                 _err("Dose Calculation Failed");
             }
-
-            _vmsApp.SaveModifications();
-            _vmsApp.ClosePatient();
 
             // create a copy plan 
             //{
@@ -1519,9 +1486,6 @@ namespace nnunet_client
             //    string out_file = in_file + ".with.dice.csv";
             //    append_dice(job_id, in_file, out_file);
             //}
-
-
-            helper.log("done.");
         }
 
         public static void create_bladder_plan2(
@@ -1540,7 +1504,7 @@ namespace nnunet_client
         {
             _info($"pid={pid}, ps_id={ps_id}");
 
-            Patient pt = _vmsApp.OpenPatientById(pid);
+            Patient pt = vmsApp.OpenPatientById(pid);
             if (pt == null)
             {
                 _err($"Patient(Id={pid}) not found");
@@ -1584,7 +1548,7 @@ namespace nnunet_client
             if (cs_of_id(cs_id, pt) != null && ps_of_id(ps_id, pt) != null)
             {
                 _info($"plan already exists: {pt.Id}->{cs_id}->{ps_id}. skipping...");
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 return;
             }
 
@@ -1638,7 +1602,7 @@ namespace nnunet_client
 
             sb.Append($",_opti_rectum");
 
-            _vmsApp.SaveModifications();
+            vmsApp.SaveModifications();
 
             /////////
             /// Body
@@ -1799,7 +1763,7 @@ namespace nnunet_client
 
             if (!opt_result.Success)
             {
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 _err($"Optimization Failed: opt_result.ToString()");
             }
 
@@ -1815,11 +1779,11 @@ namespace nnunet_client
 
             if (!lmc_result.Success)
             {
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 _err("LMC Calculation Failed");
             }
 
-            _vmsApp.SaveModifications();
+            vmsApp.SaveModifications();
 
             // Dose
             helper.log("calculating dose....");
@@ -1830,12 +1794,12 @@ namespace nnunet_client
 
             if (!dose_result.Success)
             {
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 _err("Dose Calculation Failed");
             }
 
-            _vmsApp.SaveModifications();
-            _vmsApp.ClosePatient();
+            vmsApp.SaveModifications();
+            vmsApp.ClosePatient();
 
             // create a copy plan 
             //{
@@ -1876,7 +1840,7 @@ namespace nnunet_client
             double dose_per_fx=200.0
             )
         {
-            Patient pt = _vmsApp.OpenPatientById(pid);
+            Patient pt = vmsApp.OpenPatientById(pid);
             if (pt == null)
             {
                 _err($"Patient(Id={pid}) not found");
@@ -1918,7 +1882,7 @@ namespace nnunet_client
             if (cs_of_id(cs_id, pt) !=null && ps_of_id(ps_id, pt) != null)
             {
                 _info($"plan already exists: {pt.Id}->{cs_id}->{ps_id}. skipping...");
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 return;
             }
 
@@ -2103,7 +2067,7 @@ namespace nnunet_client
 
             if (!opt_result.Success)
             {
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 _err($"Optimization Failed: opt_result.ToString()");
             }
 
@@ -2119,11 +2083,11 @@ namespace nnunet_client
 
             if (!lmc_result.Success)
             {
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 _err("LMC Calculation Failed");
             }
 
-            _vmsApp.SaveModifications();
+            vmsApp.SaveModifications();
 
             // Dose
             helper.log("calculating dose....");
@@ -2134,12 +2098,12 @@ namespace nnunet_client
 
             if (!dose_result.Success)
             {
-                _vmsApp.ClosePatient();
+                vmsApp.ClosePatient();
                 _err("Dose Calculation Failed");
             }
 
-            _vmsApp.SaveModifications();
-            _vmsApp.ClosePatient();
+            vmsApp.SaveModifications();
+            vmsApp.ClosePatient();
 
             // create a copy plan 
             //{
@@ -2230,7 +2194,7 @@ namespace nnunet_client
         {
             string log_file = out_file + ".log.txt";
 
-            VMS.TPS.Common.Model.API.Application app = _vmsApp;
+            VMS.TPS.Common.Model.API.Application app = vmsApp;
 
             // the cases done already
             string done_cases = "";
@@ -2358,7 +2322,7 @@ namespace nnunet_client
 
             string log_file = out_file + ".log.txt";
 
-            VMS.TPS.Common.Model.API.Application app = _vmsApp;
+            VMS.TPS.Common.Model.API.Application app = vmsApp;
 
             string finished_cases = "";
             if (filesystem.file_exists(out_file))
@@ -2635,7 +2599,7 @@ namespace nnunet_client
 
             string log_file = out_file + ".log.txt";
 
-            VMS.TPS.Common.Model.API.Application app = _vmsApp;
+            VMS.TPS.Common.Model.API.Application app = vmsApp;
 
             StringBuilder sb = new StringBuilder();
 
@@ -2725,7 +2689,7 @@ namespace nnunet_client
 
         public static void add_margin(string ctv_Id, string ptv_Id, Color ptv_color, double margin_mm, string import_result_file, string out_file)
         {
-            VMS.TPS.Common.Model.API.Application app = _vmsApp;
+            VMS.TPS.Common.Model.API.Application app = vmsApp;
 
             StringBuilder sb = new StringBuilder();
 

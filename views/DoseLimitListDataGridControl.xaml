@@ -1,0 +1,152 @@
+﻿<UserControl x:Class="nnunet_client.views.DoseLimitListDataGridControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:models="clr-namespace:nnunet_client.models"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="400"
+             x:Name="rootControl">
+             
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+
+
+        <DataGrid Grid.Row="0"
+                  ItemsSource="{Binding DoseLimits}"
+                  SelectedItem="{Binding SelectedDoseLimit}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID"
+                                    Binding="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Width="*"/>
+                
+                <DataGridTemplateColumn Header="Plan Contour">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Contour.Id}" VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox 
+                                ItemsSource="{Binding DataContext.Contours, ElementName=rootControl}"
+                                DisplayMemberPath="Id"
+                                SelectedItem="{Binding Contour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+
+                
+                <DataGridTemplateColumn Header="Contour Type">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding ContourType}" VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox 
+                                SelectedItem="{Binding ContourType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{x:Static models:EnumHelper.DoseLimitContourTypes}"
+                                      />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="Prescription">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Prescription.Id}" VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox 
+                ItemsSource="{Binding DataContext.Prescriptions, ElementName=rootControl}"
+                DisplayMemberPath="Id"
+                SelectedItem="{Binding Prescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                
+                <DataGridTextColumn Header="Limit"
+                    Binding="{Binding Limit, Mode=TwoWay}"
+                    Width="*"/>
+
+                <DataGridTextColumn Header="Comments"
+                    Binding="{Binding Comments, Mode=TwoWay}"
+                    Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,10,0,0">
+            <Grid Margin="5" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Content="ID:" Grid.Column="0" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding SelectedDoseLimit.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Grid.Column="1" Margin="5"/>
+
+                <Label Content="Contour ID:" Grid.Column="2" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding SelectedDoseLimit.ContourId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Grid.Column="3" Margin="5"/>
+
+                <Label Content="Contour Type:" Grid.Column="4" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="5" Margin="5"
+                          SelectedItem="{Binding SelectedDoseLimit.ContourType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{x:Static models:EnumHelper.DoseLimitContourTypes}" />
+
+                <Label Content="Limit:" Grid.Column="6" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding SelectedDoseLimit.Limit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Grid.Column="7" Margin="5"/>
+
+                <Label Content="Comments:" Grid.Column="8" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding SelectedDoseLimit.Comments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Grid.Column="9" Margin="5"/>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="Add"
+                        Command="{Binding AddCommand}"
+                        Width="75"
+                        Margin="5"/>
+                <Button Content="Remove"
+                        Command="{Binding RemoveCommand}"
+                        Width="75"
+                        Margin="5"/>
+                <Button Content="Save"
+                        Command="{Binding SaveCommand}"
+                        Width="75"
+                        Margin="5"/>
+                <Button Content="Load"
+                        Command="{Binding LoadCommand}"
+                        Width="75"
+                        Margin="5"/>
+            </StackPanel>
+        </StackPanel>
+    
+    
+    
+    </Grid>
+</UserControl>

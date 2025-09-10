@@ -4,15 +4,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using VMS.TPS.Common.Model.API;
 
 namespace nnunet_client
 {
     public static class helper
     {
+
+        public static views.LogFileViewControl Logger = null;
+
         public static void log(string message)
         {
             Console.WriteLine(message);
+
+            if (Logger != null)
+            {
+                Logger.AppendLine(message);
+            }
         }
+
+        public static async Task log_and_yield(string message)
+        {
+            log(message);
+            await Task.Delay(1); // Let UI thread catch up
+        }
+
 
         public static void print(string message)
         {
@@ -24,7 +41,15 @@ namespace nnunet_client
             Console.WriteLine(message);
         }
 
+        public static void show_error_msg_box(string message)
+        {
+             MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
 
+        public static void show_warning_msg_box(string message)
+        {
+            MessageBox.Show(message, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
 
         public static string join(string path1, string path2)
         {
