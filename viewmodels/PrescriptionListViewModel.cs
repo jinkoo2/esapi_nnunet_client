@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Win32;
+using System.Windows;
 
 namespace nnunet_client.viewmodels
 {
@@ -23,12 +24,34 @@ namespace nnunet_client.viewmodels
     {
 
         // Commands that the UI buttons will bind to.
+        [JsonIgnore]  
         public ICommand AddCommand { get; }
+        [JsonIgnore]
         public ICommand RemoveCommand { get; }
 
+        [JsonIgnore]
+        public ICommand DuplicateCommand { get; }
+
+        [JsonIgnore]
         public ICommand LoadCommand { get; }
+        [JsonIgnore]
         public ICommand SaveCommand { get; }
 
+        private Visibility _saveLoadButtonsVisibility = Visibility.Visible;
+        [JsonIgnore]
+        public Visibility SaveLoadButtonsVisibility
+        {
+            get { return _saveLoadButtonsVisibility; }
+            set
+            {
+                if (_saveLoadButtonsVisibility != value)
+                {
+                    _saveLoadButtonsVisibility = value;
+
+                    OnPropertyChanged(nameof(SaveLoadButtonsVisibility));
+                }
+            }
+        }
 
         private ObservableCollection<Prescription> _prescriptions;
         [JsonProperty]  // ✅ include in JSON
@@ -53,12 +76,14 @@ namespace nnunet_client.viewmodels
                 OnPropertyChanged();
                 //OnPropertyChanged(nameof(SelectedPrescriptionTotalDose));
 
-                //Notify the RemoveCommand that it should re-evaluate its state
+                //Notify the commands that it should re-evaluate its state
                 ((RelayCommand)RemoveCommand).RaiseCanExecuteChanged();
+                ((RelayCommand)DuplicateCommand).RaiseCanExecuteChanged();
             }
         }
 
         // A computed property to show the TotalDose of the selected prescription
+        [JsonIgnore]  // not include in JSON
         public double? SelectedPrescriptionTotalDose => _selectedPrescription?.TotalDose;
 
         public PrescriptionListViewModel()
@@ -66,16 +91,14 @@ namespace nnunet_client.viewmodels
             Prescriptions = new ObservableCollection<Prescription>();
             //Prescriptions.Add(new Prescription { Id = "Default", TotalDose = 3000 });
 
-            // Initialize commands, linking them to the logic methods.
+            AddCommand = new RelayCommand(Add);
+            RemoveCommand = new RelayCommand(Remove, CanRemove);
+            DuplicateCommand = new RelayCommand(Duplicate, CanRemove);
             LoadCommand = new RelayCommand(Load);
             SaveCommand = new RelayCommand(Save);
-
-            // 🎯 Initialize the new commands
-            AddCommand = new RelayCommand(AddPrescription);
-            RemoveCommand = new RelayCommand(RemovePrescription, CanRemovePrescription);
         }
 
-        private void AddPrescription()
+        private void Add()
         {
             // Add a new, empty prescription to the list
             Prescriptions.Add(new Prescription { Id = "New", TotalDose = 0.0 });
@@ -83,7 +106,7 @@ namespace nnunet_client.viewmodels
             SelectedPrescription = Prescriptions.Last();
         }
 
-        private void RemovePrescription()
+        private void Remove()
         {
             if (SelectedPrescription != null)
             {
@@ -91,22 +114,25 @@ namespace nnunet_client.viewmodels
             }
         }
 
-        private bool CanRemovePrescription()
+        private void Duplicate()
+        {
+            if (SelectedPrescription != null)
+            {
+                Prescriptions.Add(SelectedPrescription.Duplicate());
+            }
+        }
+
+
+        private bool CanRemove()
         {
             // The remove button is only enabled when an item is selected
             return SelectedPrescription != null;
         }
 
-
-
         private void Load()
         {
-            
-                OpenFileDialog openFileDialog = new OpenFileDialog();
-                openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
-
-                
-
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
 
             if (openFileDialog.ShowDialog() == true)
             {

@@ -7,38 +7,17 @@ namespace nnunet_client.models
     // The Prescription class must implement INotifyPropertyChanged
     // to allow a listener (like the UI or a debug method) to be
     // notified when a property's value changes.
-    public class Contour : INotifyPropertyChanged
+    public class Contour : BaseModel
     {
         private string _id;
-
-        // INotifyPropertyChanged requires this event to be defined.
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public string Id
         {
             get => _id;
-            set
-            {
-                if (_id != value)
-                {
-                    _id = value;
-                    OnPropertyChanged();
-                }
-            }
+            set => SetProperty<string>(ref _id, value);
         }
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            // debug
-            Console.WriteLine("Prescription changed:" + propertyName);
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public override string ToString()
-        {
-            return $"Id: {Id}";
-        }
+        public override string ToString()=> $"Id: {Id}";
 
     }
 }

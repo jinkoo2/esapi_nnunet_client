@@ -17,6 +17,7 @@ using VMSRegistration = VMS.TPS.Common.Model.API.Registration;
 using VMSReferencePoint = VMS.TPS.Common.Model.API.ReferencePoint;
 using VMSHospital = VMS.TPS.Common.Model.API.Hospital;
 using nnunet_client.views;
+using System.Collections.ObjectModel;
 
 namespace nnunet_client
 {
@@ -27,9 +28,9 @@ namespace nnunet_client
             InitializeComponent();
 
             // select a patient
-            PatientSearchBox.SourceList = esapiApp.PatientSummaries
-                .Select(p=> $"{p.LastName}, {p.FirstName}, {p.Id}")
-                .ToList();
+            PatientSearchBox.ItemsSource = new ObservableCollection<string>(esapiApp.PatientSummaries
+                .Select(p => $"{p.LastName}, {p.FirstName}, {p.Id}"));
+
 
             // patient selected
             PatientSearchBox.SelectedItemChanged += (s, selectedString) =>

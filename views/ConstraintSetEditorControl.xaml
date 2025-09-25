@@ -38,6 +38,9 @@
             x:Name="doseLimitListDataGridControl"
             Grid.Row="3"
             />
+
+
+        
     </Grid>
         
 </UserControl>

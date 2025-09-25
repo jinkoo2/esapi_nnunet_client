@@ -1,24 +1,27 @@
-﻿using System;
-using System.Linq;
-using System.Text;
+﻿using esapi;
+using nnunet_client.models;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Windows.Media.Effects;
+
+using System.Windows;
+
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
-using esapi;
-
 using VMSApplication = VMS.TPS.Common.Model.API.Application;
-using VMSPatient = VMS.TPS.Common.Model.API.Patient;
-using VMSStructureSet = VMS.TPS.Common.Model.API.StructureSet;
-using VMSStructure = VMS.TPS.Common.Model.API.Structure;
-using VMSImage = VMS.TPS.Common.Model.API.Image;
 using VMSCourse = VMS.TPS.Common.Model.API.Course;
-using VMSStudy = VMS.TPS.Common.Model.API.Study;
-using VMSSeries = VMS.TPS.Common.Model.API.Series;
-using VMSRegistration = VMS.TPS.Common.Model.API.Registration;
-using VMSReferencePoint = VMS.TPS.Common.Model.API.ReferencePoint;
 using VMSHospital = VMS.TPS.Common.Model.API.Hospital;
-using System.Windows.Media.Effects;
+using VMSImage = VMS.TPS.Common.Model.API.Image;
+using VMSPatient = VMS.TPS.Common.Model.API.Patient;
+using VMSReferencePoint = VMS.TPS.Common.Model.API.ReferencePoint;
+using VMSRegistration = VMS.TPS.Common.Model.API.Registration;
+using VMSSeries = VMS.TPS.Common.Model.API.Series;
+using VMSStructure = VMS.TPS.Common.Model.API.Structure;
+using VMSStructureSet = VMS.TPS.Common.Model.API.StructureSet;
+using VMSStudy = VMS.TPS.Common.Model.API.Study;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
 [assembly: AssemblyVersion("1.0.0.1")]
@@ -38,6 +41,9 @@ namespace nnunet_client
         {
             try
             {
+
+                //nnunet_client.models.DoseLimitEvaluator.RunTests();
+
                 using (VMSApplication app = VMSApplication.CreateApplication())
                 {
                     Execute(app);
@@ -50,8 +56,7 @@ namespace nnunet_client
         }
 
 
-
-        static void Execute(Application vmsApp)
+        static void Execute(VMS.TPS.Common.Model.API.Application vmsApp)
         {
 
 
@@ -69,9 +74,13 @@ namespace nnunet_client
             TemplateManager templateManager = new TemplateManager();
             templateManager.LoadTemplates(templateDir);
 
-            var wpfApp = new System.Windows.Application();
+            var wpfApp = new App();
 
-            var window = new nnunet_client.DoseLimitEditorWindow();
+
+            //var window = new nnunet_client.DoseLimitEditorWindow();
+            //wpfApp.Run(window);
+
+            var window = new nnunet_client.DoseLimitChecker(vmsApp);
             wpfApp.Run(window);
 
 

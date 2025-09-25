@@ -12,27 +12,79 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows;
+using System.Threading;
 
 namespace nnunet_client.viewmodels
 {
     [JsonObject(MemberSerialization.OptIn)] // only include explicitly marked properties
-    public class DoseLimitListViewModel : INotifyPropertyChanged
+    public class DoseLimitListViewModel : BaseViewModel
     {
+        [JsonIgnore]
         public ICommand AddCommand { get; }
+        [JsonIgnore]
         public ICommand RemoveCommand { get; }
+
+        [JsonIgnore]
+        public ICommand DuplicateCommand { get; }
+
+        [JsonIgnore]
         public ICommand LoadCommand { get; }
+        [JsonIgnore]
         public ICommand SaveCommand { get; }
+
+        private Visibility _saveLoadButtonsVisibilty = Visibility.Visible;
+        public Visibility SaveLoadButtonsVisibility
+        {
+            get { return _saveLoadButtonsVisibilty; }
+            set
+            {
+                if (_saveLoadButtonsVisibilty != value)
+                {
+                    _saveLoadButtonsVisibilty = value;
+
+                    OnPropertyChanged(nameof(SaveLoadButtonsVisibility));
+
+                    Console.WriteLine($"SaveLoadButtonsVisible={_saveLoadButtonsVisibilty}");
+                }
+            }
+        }
+
+        private VMS.TPS.Common.Model.API.PlanningItem _plan;
+        [JsonIgnore]  // not include in JSON
+        public VMS.TPS.Common.Model.API.PlanningItem Plan
+        {
+            get
+            {
+                return _plan;
+            }
+            set
+            {
+                if (value != _plan)
+                {
+                    Console.WriteLine($"DoseLimitListViewModel - Setting a new plan...{_plan?.Id}");
+
+                    SetProperty<VMS.TPS.Common.Model.API.PlanningItem>(ref _plan, value);
+
+                    OnPropertyChanged(nameof(Contours));
+
+                    // set plan to the dose limits
+                    foreach (DoseLimit doseLimit in this.DoseLimits)
+                    {
+                        doseLimit.Plan = value;
+                    }
+
+                    
+                }
+            }
+        }
 
         private ObservableCollection<Prescription> _prescriptions;
         [JsonProperty]  // ✅ include in JSON
         public ObservableCollection<Prescription> Prescriptions
         {
             get => _prescriptions;
-            set
-            {
-                _prescriptions = value;
-                OnPropertyChanged();
-            }
+            set => SetProperty<ObservableCollection<Prescription>>(ref _prescriptions, value);
         }
 
         private ObservableCollection<DoseLimit> _doseLimits;
@@ -40,11 +92,7 @@ namespace nnunet_client.viewmodels
         public ObservableCollection<DoseLimit> DoseLimits
         {
             get => _doseLimits;
-            set
-            {
-                _doseLimits = value;
-                OnPropertyChanged();
-            }
+            set => SetProperty<ObservableCollection<DoseLimit>>(ref _doseLimits, value);
         }
 
         private DoseLimit _selectedDoseLimit;
@@ -54,36 +102,40 @@ namespace nnunet_client.viewmodels
             get => _selectedDoseLimit;
             set
             {
-                _selectedDoseLimit = value;
-                OnPropertyChanged();
-                ((RelayCommand)RemoveCommand).RaiseCanExecuteChanged();
+                if (value != _selectedDoseLimit)
+                {
+                    SetProperty<DoseLimit>(ref _selectedDoseLimit, value);
+                   
+                    ((RelayCommand)RemoveCommand).RaiseCanExecuteChanged();
+                    ((RelayCommand)DuplicateCommand).RaiseCanExecuteChanged();
+                }
             }
         }
 
-        private ObservableCollection<Contour> _contours;
-        [JsonProperty]  // ✅ include in JSON
-        public ObservableCollection<Contour> Contours
+        [JsonIgnore]  // not include in JSON
+        public ObservableCollection<models.Contour> Contours
         {
-            get => _contours;
-            set
+            get
             {
-                _contours = value;
-                OnPropertyChanged();
+                if (_plan != null)
+                    return new ObservableCollection<models.Contour>(_plan.StructureSet.Structures.Select(s => new models.Contour() { Id = s.Id }));
+                else
+                    return new ObservableCollection<models.Contour>();
             }
         }
 
-        private string _comments;
-        [JsonProperty]  // ✅ include in JSON
-        public string Comments
-        {
-            get => _comments;
-            set
-            {
-                _comments = value;
-                OnPropertyChanged();
-            }
-        }
 
+        //private string _comments;
+        //[JsonProperty]  // ✅ include in JSON
+        //public string Comments
+        //{
+        //    get => _comments;
+        //    set
+        //    {
+        //        _comments = value;
+        //        OnPropertyChanged();
+        //    }
+        //}
 
         // constructor
         public DoseLimitListViewModel()
@@ -93,7 +145,7 @@ namespace nnunet_client.viewmodels
             //var cont1 = new Contour { Id = "PTV" };
             //var cont2 = new Contour { Id = "Bowel" };
 
-            Contours = new ObservableCollection<Contour>();
+         
             //Contours.Add(cont1);
             //Contours.Add(cont2);
 
@@ -105,21 +157,30 @@ namespace nnunet_client.viewmodels
             //DoseLimits.Add(new DoseLimit { Id = "DL002", Contour = cont2 });
 
             Prescriptions = new ObservableCollection<Prescription>();
+
+
             //Prescriptions.Add(new Prescription { Id = "Default", TotalDose = 3000 });
 
             LoadCommand = new RelayCommand(Load);
             SaveCommand = new RelayCommand(Save);
-            AddCommand = new RelayCommand(AddDoseLimit);
-            RemoveCommand = new RelayCommand(RemoveDoseLimit, CanRemoveDoseLimit);
+            AddCommand = new RelayCommand(Add);
+            RemoveCommand = new RelayCommand(Remove, IsItemSelected);
+            DuplicateCommand = new RelayCommand(Duplicate, IsItemSelected);
         }
 
-        private void AddDoseLimit()
+        private void Add()
         {
-            DoseLimits.Add(new DoseLimit {Id = "New"});
+            DoseLimit doselimit = new DoseLimit { Id = "New" };
+
+            if (_prescriptions?.Count()>0)
+                doselimit.Prescription = _prescriptions[0];
+
+            DoseLimits.Add(doselimit);
+
             SelectedDoseLimit = DoseLimits.Last();
         }
 
-        private void RemoveDoseLimit()
+        private void Remove()
         {
             if (SelectedDoseLimit != null)
             {
@@ -127,7 +188,16 @@ namespace nnunet_client.viewmodels
             }
         }
 
-        private bool CanRemoveDoseLimit()
+        private void Duplicate()
+        {
+            if (SelectedDoseLimit != null)
+            {
+                DoseLimits.Add(SelectedDoseLimit.Duplicate());
+            }
+        }
+
+
+        private bool IsItemSelected()
         {
             return SelectedDoseLimit != null;
         }
@@ -190,7 +260,7 @@ namespace nnunet_client.viewmodels
                     }
 
                     // comments
-                    this.Comments = loaded.Comments;
+                    // this.Comments = loaded.Comments;
                 }
                 catch (Exception ex)
                 {
@@ -225,11 +295,8 @@ namespace nnunet_client.viewmodels
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        
 
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
+       
     }
 }

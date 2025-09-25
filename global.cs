@@ -23,9 +23,7 @@ namespace nnunet_client
         public static VMSPatient vmsPatient = null;
         public static VMSApplication vmsApplication = null;
 
-
         public static string data_root_secure = @"G:\data_secure";
         public static bool make_export_log = false; // do not make export_log.
-
     }
 }

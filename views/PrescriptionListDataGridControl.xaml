@@ -48,19 +48,21 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
                 <Button Content="Add"
 						Command="{Binding AddCommand}"
-						Width="75"
 						Margin="5"/>
                 <Button Content="Remove"
 						Command="{Binding RemoveCommand}"
-						Width="75"
 						Margin="5"/>
+                <Button Content="Duplicate"
+					Command="{Binding DuplicateCommand}"
+					Margin="5"/>
                 <Button Content="Save"
-		                 Command="{Binding SaveCommand}"
-		                 Width="75"
-		                 Margin="5"/>
+		                Command="{Binding SaveCommand}"
+                        Visibility="{Binding SaveLoadButtonsVisibility}"
+		                 Margin="5"
+                        />
                 <Button Content="Load"
 		                 Command="{Binding LoadCommand}"
-		                 Width="75"
+                         Visibility="{Binding SaveLoadButtonsVisibility}"
 		                 Margin="5"/>
             </StackPanel>
         </StackPanel>

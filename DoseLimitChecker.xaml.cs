@@ -12,20 +12,25 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using nnunet_client.viewmodels; // Added the namespace for your view model
 
 namespace nnunet_client
 {
+
+
     /// <summary>
-    /// Interaction logic for SimplePrescriptionWindow.xaml
+    /// Interaction logic for DoseLimitCheckerWindow.xaml
     /// </summary>
-    public partial class DoseLimitEditorWindow : Window
+    public partial class DoseLimitChecker : Window
     {
-        public DoseLimitEditorWindow()
+        public DoseLimitChecker(VMS.TPS.Common.Model.API.Application esapiApp)
         {
+
+            
+
             InitializeComponent();
 
-            this.DataContext = new DoseLimitListEditorViewModel();
+            this.DataContext = new nnunet_client.viewmodels.DoseLimitCheckerViewModel(esapiApp);
+           
         }
     }
 }

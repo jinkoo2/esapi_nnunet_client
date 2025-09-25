@@ -74,6 +74,17 @@ namespace nnunet_client
             return true;
         }
 
+        public static bool copy_file(string src, string dst)
+        {
+            if (file_exists(dst))
+                System.IO.File.Delete(dst);
+
+            System.IO.File.Copy(src, dst);
+
+            return true;
+        }
+
+
         public static void write(string path, string txt)
         {
             System.IO.File.WriteAllText(path, txt);

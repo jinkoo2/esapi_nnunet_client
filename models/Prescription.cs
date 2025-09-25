@@ -1,59 +1,38 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Navigation;
 
 namespace nnunet_client.models
 {
     // The Prescription class must implement INotifyPropertyChanged
     // to allow a listener (like the UI or a debug method) to be
     // notified when a property's value changes.
-    public class Prescription : INotifyPropertyChanged
+    public class Prescription : BaseModel
     {
         private string _id;
         private double _totalDose;
 
-        // INotifyPropertyChanged requires this event to be defined.
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public string Id
         {
             get => _id;
-            set
-            {
-                if (_id != value)
-                {
-                    _id = value;
-                    OnPropertyChanged();
-                }
-            }
+            set => SetProperty<string>(ref _id, value);
         }
 
         public double TotalDose
         {
             get => _totalDose;
-            set
-            {
-                if (_totalDose != value)
-                {
-                    _totalDose = value;
-                    // This is where we notify that the property has changed.
-                    OnPropertyChanged();
-                }
-            }
+            set => SetProperty<double>(ref _totalDose, value);
         }
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        public string Unit
         {
-            // debug
-            Console.WriteLine("Prescription changed:" + propertyName);
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            get => "cGy";
         }
 
-        public override string ToString()
-        {
-            return $"ID: {Id}, TotalDose: {TotalDose}";
-        }
-
+        public override string ToString() => $"ID: {Id}, TotalDose: {TotalDose} {Unit}";
+       
+        public Prescription Duplicate()=> new Prescription() {Id = this.Id, TotalDose = this.TotalDose };
+        
     }
 }

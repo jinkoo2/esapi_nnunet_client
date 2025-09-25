@@ -1,0 +1,106 @@
+﻿<UserControl x:Class="nnunet_client.views.DoseLimitCheckerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:esapiui ="clr-namespace:esapi.UI;assembly=esapi" 
+             xmlns:local="clr-namespace:nnunet_client.views"
+             
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <!-- Left section -->
+            <ColumnDefinition Width="*"/>
+            <!-- Right section -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Section -->
+        <StackPanel Grid.Column="0" Margin="5" Background="#F9F9F9">
+
+            <!-- Patient Section -->
+            <GroupBox Header="Patient" Margin="5">
+                <esapiui:AutoCompleteTextBox 
+                    ItemsSource="{Binding PatientNameIdList}" 
+                    SelectedItem="{Binding SelectedPatientNameId}"
+                    />
+            </GroupBox>
+
+            <!-- Course Section -->
+            <GroupBox Header="Course" Margin="5">
+                <ComboBox
+                    ItemsSource="{Binding CourseIdList}"
+                    SelectedItem="{Binding SelectedCourseId}"
+                    />
+            </GroupBox>
+
+            <!-- Plan Section -->
+            <GroupBox Header="Plan" Margin="5">
+                <ComboBox
+                    ItemsSource="{Binding PlanIdList}"
+                    SelectedItem="{Binding SelectedPlanId}"
+                    />
+            </GroupBox>
+
+            <!-- Select Dose Limit Template -->
+            <GroupBox Header="Dose Limit Template" Margin="5">
+                <StackPanel Orientation="Vertical">
+
+                    <ListView
+                        ItemsSource="{Binding DoseLimitListEditorViewModelList}"
+                        SelectedItem="{Binding SelectedDoseLimitListEditorViewModel}"
+                        DisplayMemberPath="Title"
+                        />
+
+                    <StackPanel Orientation="Horizontal">
+
+                        <Button
+Command="{Binding NewDoseLimitSetCommand}"
+>New
+                        </Button>
+                        
+                        <Button
+    Command="{Binding ImportTemplateCommand}"
+    >Import from Templates...
+                        </Button>
+
+                        <Button
+    Command="{Binding SaveDoseLimitListEditorViewModelListCommand}"
+    >Save List
+                        </Button>
+
+                        
+                    </StackPanel>
+                </StackPanel>
+
+
+
+
+
+            </GroupBox>
+
+
+
+            <!-- command buttons -->
+            <GroupBox Header="Commands" Margin="5">
+                <StackPanel Orientation="Vertical">
+
+                    <Button 
+                        Command="{Binding EvaluateDoseLimitesCommand}" 
+                        Content="Evaluate Dose Limites"
+                        />
+
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+
+        <!-- Right Section -->
+        <Border Grid.Column="1" Margin="5" BorderBrush="Gray" BorderThickness="1">
+            <local:DoseLimitListEditorControl 
+                DataContext="{Binding SelectedDoseLimitListEditorViewModel}"
+                Margin="10"/>
+        </Border>
+
+    </Grid>
+</UserControl>
