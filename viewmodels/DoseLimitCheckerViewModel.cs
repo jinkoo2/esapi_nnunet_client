@@ -160,6 +160,8 @@ namespace nnunet_client.viewmodels
             }
         }
 
+        public string PatientSearchQuery {  get; set; }
+
 
         public ObservableCollection<string> CourseIdList { get; set; }
         private string _selectedCourseId;
