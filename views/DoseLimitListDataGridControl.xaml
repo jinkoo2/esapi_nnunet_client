@@ -9,6 +9,61 @@
              d:DesignHeight="1000" d:DesignWidth="1000"
              x:Name="rootControl">
 
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/StandardStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="RowTextBlockStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="5,0"/>
+            </Style>
+
+            <Style x:Key="RowTextBoxStyle" TargetType="{x:Type TextBox}">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="5,0"/>
+            </Style>
+
+            <Style x:Key="ResultTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource RowTextBlockStyle}">
+                <Setter Property="Foreground" Value="Green"/>
+
+                <Style.Triggers>
+
+                    <!-- Trigger for "Fail" -->
+                    <!-- The DataTrigger binds directly to the 'Result' property of the row's data context -->
+                    <DataTrigger Binding="{Binding Result}" Value="Fail">
+                        <Setter Property="Foreground" Value="Red" />
+                    </DataTrigger>
+
+                    <!-- Trigger for "Acceptable" -->
+                    <DataTrigger Binding="{Binding Result}" Value="Acceptable">
+                        <Setter Property="Foreground" Value="Blue" />
+                    </DataTrigger>
+
+                </Style.Triggers>
+            </Style>
+
+
+
+            <Style x:Key="LimitTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource RowTextBlockStyle}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding LimitValid}" Value="False">
+                        <Setter Property="Foreground" Value="Red"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="LimitTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource RowTextBoxStyle}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding LimitValid}" Value="False">
+                        <Setter Property="Foreground" Value="Red"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+        </ResourceDictionary>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -23,14 +78,18 @@
                   AutoGenerateColumns="False"
                   CanUserAddRows="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID"
-                                    Binding="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    Width="*"/>
+                
 
+                <DataGridTextColumn Header="ID"
+                    Binding="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource RowTextBlockStyle}"   
+                    EditingElementStyle="{StaticResource RowTextBoxStyle}"   
+                    Width="*"/>
+                
                 <DataGridTemplateColumn Header="Plan Contour">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Contour.Id}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Contour.Id}" VerticalAlignment="Center" Margin="0, 4" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
@@ -39,7 +98,8 @@
                                 ItemsSource="{Binding DataContext.Contours, ElementName=rootControl}"
                                 DisplayMemberPath="Id"
                                 SelectedItem="{Binding Contour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      />
+                                Margin="0, 4"      
+                                />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -64,7 +124,7 @@
                 <DataGridTemplateColumn Header="Prescription">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Prescription.Id}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Prescription.Id}" VerticalAlignment="Center" Margin="0, 4" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
@@ -73,29 +133,39 @@
                                 ItemsSource="{Binding DataContext.Prescriptions, ElementName=rootControl}"
                                 DisplayMemberPath="Id"
                                 SelectedItem="{Binding Prescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             />
+                                Margin="0, 4"
+                                />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
                 <DataGridTextColumn Header="Limit"
-                    Binding="{Binding Limit, Mode=TwoWay}"
+                    Binding="{Binding Limit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ElementStyle="{StaticResource LimitTextBlockStyle}"   
+                    EditingElementStyle="{StaticResource LimitTextBoxStyle}"   
                     Width="*"/>
 
                 <DataGridTextColumn Header="Value"
                     Binding="{Binding Value.Display, Mode=OneWay}"
+                                                        ElementStyle="{StaticResource RowTextBlockStyle}"   
                     Width="*"/>
-                
-                <DataGridTextColumn Header="Result"
+
+                <DataGridTextColumn 
+                    Header="Result"
                     Binding="{Binding Result, Mode=OneWay}"
+                    ElementStyle="{StaticResource ResultTextBlockStyle}"
                     Width="*"/>
 
                 <DataGridTextColumn Header="Comments"
                     Binding="{Binding Comments, Mode=TwoWay}"
+                                    ElementStyle="{StaticResource RowTextBlockStyle}"   
+                                    EditingElementStyle="{StaticResource RowTextBoxStyle}"
                     Width="*"/>
 
                 <DataGridTextColumn Header="Error"
-                    Binding="{Binding ErrorMessage, Mode=TwoWay}"
+                    Binding="{Binding ErrorMessage, Mode=OneWay}"
+                                    Foreground="Red"
+                                    ElementStyle="{StaticResource RowTextBlockStyle}"
                     Width="*"/>
 
             </DataGrid.Columns>
@@ -170,7 +240,7 @@
                         Command="{Binding RemoveCommand}"
                         Width="75"
                         Margin="5"/>
-                
+
                 <Button Content="Duplicate"
                         Command="{Binding DuplicateCommand}"
                         Width="75"

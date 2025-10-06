@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MahApps.Metro.Controls;
 
 namespace nnunet_client
 {
@@ -25,12 +26,11 @@ namespace nnunet_client
         public DoseLimitChecker(VMS.TPS.Common.Model.API.Application esapiApp)
         {
 
-            
-
             InitializeComponent();
 
             this.DataContext = new nnunet_client.viewmodels.DoseLimitCheckerViewModel(esapiApp);
-           
         }
+
+
     }
 }

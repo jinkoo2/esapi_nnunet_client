@@ -6,6 +6,15 @@
              xmlns:local="clr-namespace:nnunet_client.views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/StandardStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -21,6 +30,7 @@
            FontSize="20"
            HorizontalAlignment="Center"
            Margin="0,5,0,5"
+                 Padding="5"
            Text="{Binding Title}"/>
 
         <TextBlock Grid.Row="1"

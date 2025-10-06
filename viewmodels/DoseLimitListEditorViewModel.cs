@@ -22,7 +22,7 @@ namespace nnunet_client.viewmodels
         [JsonIgnore]  // not include in JSON
         public ICommand SaveCommand { get; }
 
-        private string _title = "Dose Limit Set";
+        private string _title = "Dose Limits";
         [JsonProperty]  // include in JSON
         public string Title { 
             get=>_title;

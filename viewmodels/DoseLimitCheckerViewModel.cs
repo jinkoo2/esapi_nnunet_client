@@ -392,6 +392,9 @@ namespace nnunet_client.viewmodels
                 _esapiApp.PatientSummaries.Select(p => $"{p.LastName}, {p.FirstName}, {p.Id}")
             );
 
+            // empty editor
+            this.SelectedDoseLimitListEditorViewModel = new DoseLimitListEditorViewModel();
+
             // commands
             ImportTemplateCommand = new RelayCommand(ImportTemplate);
             SaveDoseLimitListEditorViewModelListCommand = new RelayCommand(SaveDoseLimitListEditorViewModelList);

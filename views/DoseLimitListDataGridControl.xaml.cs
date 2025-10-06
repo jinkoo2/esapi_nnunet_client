@@ -24,5 +24,19 @@ namespace nnunet_client.views
         {
             InitializeComponent();
         }
+
+        private void TextBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            // The sender is the TextBox instance that just loaded inside the DataGridCell
+            if (sender is TextBox textBox)
+            {
+                // 1. Give the TextBox focus (often needed to ensure keyboard input is ready)
+                textBox.Focus();
+
+                // 2. Select all existing text
+                textBox.SelectAll();
+            }
+
+        }
     }
 }

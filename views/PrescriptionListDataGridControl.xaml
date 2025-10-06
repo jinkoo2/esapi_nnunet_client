@@ -8,8 +8,8 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <DataGrid Grid.Row="0"
@@ -17,6 +17,8 @@
 				  SelectedItem="{Binding SelectedPrescription}"
 				  AutoGenerateColumns="False"
 				  CanUserAddRows="False">
+
+          
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID"
 									Binding="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
