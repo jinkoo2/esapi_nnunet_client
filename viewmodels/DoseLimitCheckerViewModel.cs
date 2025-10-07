@@ -17,6 +17,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Markup;
 using Xceed.Wpf.Toolkit.Core.Converters;
 using VMSCourse = VMS.TPS.Common.Model.API.Course;
 using VMSHospital = VMS.TPS.Common.Model.API.Hospital;
@@ -36,9 +37,69 @@ namespace nnunet_client.viewmodels
     public class DoseLimitCheckerViewModel : BaseViewModel
     {
         public ICommand ImportTemplateCommand { get; }
+
+
+        public ICommand AddDoseLimitSetCommand { get; }
+
+        public ICommand RemoveDoseLimitSetCommand { get; }
+
+        public ICommand DuplicateDoseLimitSetCommand { get; }
         public ICommand SaveDoseLimitListEditorViewModelListCommand { get; }
 
-        public ICommand EvaluateDoseLimitesCommand { get; }
+
+        private void AddDoseLimitSet()
+        {
+            if (!validate_selections())
+                return;
+
+            var data = new DoseLimitListEditorViewModel();
+            data.LoadButtonVisibility = Visibility.Collapsed;
+            this.DoseLimitListEditorViewModelList.Add(data);
+            this.SelectedDoseLimitListEditorViewModel = data;
+        }
+
+        private void RemoveDoseLimitSet()
+        {
+            if (!validate_selections())
+                return;
+
+            if (this.SelectedDoseLimitListEditorViewModel == null)
+            {
+                MessageBox.Show("Select an item to remove");
+                return;
+            }
+
+            this.DoseLimitListEditorViewModelList.Remove(this.SelectedDoseLimitListEditorViewModel);
+        }
+        private bool CanRemoveDoseLimitSet()
+        {
+            // The button is only enabled if an item is currently selected.
+            return this.SelectedDoseLimitListEditorViewModel != null;
+        }
+
+        private void DuplicateDoseLimitSet()
+        {
+            if (!validate_selections())
+                return;
+
+            if (this.SelectedDoseLimitListEditorViewModel == null)
+            {
+                MessageBox.Show("Select an item to duplicate");
+                return;
+            }
+
+            var copy = this.SelectedDoseLimitListEditorViewModel.Duplicate();
+
+            copy.Title = copy.Title + " Copy";
+
+            this.DoseLimitListEditorViewModelList.Add(copy);
+        }
+        private bool CanDuplicateDoseLimitSet()
+        {
+            // The button is only enabled if an item is currently selected.
+            return this.SelectedDoseLimitListEditorViewModel != null;
+        }
+
 
         private void ImportTemplate()
         {
@@ -68,6 +129,7 @@ namespace nnunet_client.viewmodels
                     Console.WriteLine($"Loading case file... {case_file_path}");
                     string json = File.ReadAllText(case_file_path);
                     DoseLimitListEditorViewModel data = JsonConvert.DeserializeObject<DoseLimitListEditorViewModel>(json);
+                    data.LoadButtonVisibility = Visibility.Collapsed;
 
                     // add to the list and select
                     this.DoseLimitListEditorViewModelList.Add(data);
@@ -357,7 +419,7 @@ namespace nnunet_client.viewmodels
             set => SetProperty<ObservableCollection<DoseLimitListEditorViewModel>>(ref _doseLimitListEditorViewModelList, value);
         }
 
-        private DoseLimitListEditorViewModel _selectedDoseLimitListEditorViewModel;
+        private DoseLimitListEditorViewModel _selectedDoseLimitListEditorViewModel = null;
         public DoseLimitListEditorViewModel SelectedDoseLimitListEditorViewModel
         {
             get { return _selectedDoseLimitListEditorViewModel; }
@@ -367,7 +429,8 @@ namespace nnunet_client.viewmodels
                 {
                     _p($"editor view model changed to {_selectedDoseLimitListEditorViewModel?.Title}");
                     SetProperty<DoseLimitListEditorViewModel>(ref _selectedDoseLimitListEditorViewModel, value);
-                    
+                    _selectedDoseLimitListEditorViewModel.LoadButtonVisibility = Visibility.Collapsed;
+
                     if(_selectedDoseLimitListEditorViewModel !=null)
                     {
                         _p($"Setting the plan to the selected dose limit editor");
@@ -394,11 +457,14 @@ namespace nnunet_client.viewmodels
 
             // empty editor
             this.SelectedDoseLimitListEditorViewModel = new DoseLimitListEditorViewModel();
-
+            this.SelectedDoseLimitListEditorViewModel.LoadButtonVisibility= Visibility.Collapsed;
+            
             // commands
+            AddDoseLimitSetCommand = new RelayCommand(AddDoseLimitSet);
+            RemoveDoseLimitSetCommand = new RelayCommand(RemoveDoseLimitSet, CanRemoveDoseLimitSet);
+            DuplicateDoseLimitSetCommand = new RelayCommand(DuplicateDoseLimitSet, CanDuplicateDoseLimitSet);
             ImportTemplateCommand = new RelayCommand(ImportTemplate);
             SaveDoseLimitListEditorViewModelListCommand = new RelayCommand(SaveDoseLimitListEditorViewModelList);
-            EvaluateDoseLimitesCommand = new RelayCommand(EvaluateDoseLimites);
         }
 
         private void EvaluateDoseLimites()

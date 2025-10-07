@@ -8,7 +8,9 @@
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d"
         Title="Plan Dose Limit Checker" Height="900" Width="1600"
-        FontFamily="Arial" FontSize="12">
+        FontFamily="Arial" FontSize="12"
+        WindowState="Maximized"
+        >
 
     <Window.Resources>
         <ResourceDictionary>

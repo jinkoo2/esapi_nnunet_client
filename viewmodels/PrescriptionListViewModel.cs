@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using Microsoft.Win32;
 using System.Windows;
+using System.Windows.Input;
 
 namespace nnunet_client.viewmodels
 {
@@ -17,6 +17,7 @@ namespace nnunet_client.viewmodels
     using System.ComponentModel;
     using System.Runtime.CompilerServices;
     using System.Windows.Input;
+    using System.Windows.Markup;
     using System.Windows.Shapes;
 
     [JsonObject(MemberSerialization.OptIn)] // only include explicitly marked properties
@@ -91,14 +92,14 @@ namespace nnunet_client.viewmodels
             Prescriptions = new ObservableCollection<Prescription>();
             //Prescriptions.Add(new Prescription { Id = "Default", TotalDose = 3000 });
 
-            AddCommand = new RelayCommand(Add);
-            RemoveCommand = new RelayCommand(Remove, CanRemove);
-            DuplicateCommand = new RelayCommand(Duplicate, CanRemove);
+            AddCommand = new RelayCommand(AddItem);
+            RemoveCommand = new RelayCommand(RemoveItem, CanRemoveItem);
+            DuplicateCommand = new RelayCommand(DuplicateItem, CanRemoveItem);
             LoadCommand = new RelayCommand(Load);
             SaveCommand = new RelayCommand(Save);
         }
 
-        private void Add()
+        private void AddItem()
         {
             // Add a new, empty prescription to the list
             Prescriptions.Add(new Prescription { Id = "New", TotalDose = 0.0 });
@@ -106,7 +107,7 @@ namespace nnunet_client.viewmodels
             SelectedPrescription = Prescriptions.Last();
         }
 
-        private void Remove()
+        private void RemoveItem()
         {
             if (SelectedPrescription != null)
             {
@@ -114,7 +115,7 @@ namespace nnunet_client.viewmodels
             }
         }
 
-        private void Duplicate()
+        private void DuplicateItem()
         {
             if (SelectedPrescription != null)
             {
@@ -123,10 +124,26 @@ namespace nnunet_client.viewmodels
         }
 
 
-        private bool CanRemove()
+        private bool CanRemoveItem()
         {
             // The remove button is only enabled when an item is selected
             return SelectedPrescription != null;
+        }
+
+        public PrescriptionListViewModel Duplicate()
+        {
+            PrescriptionListViewModel copy = new PrescriptionListViewModel();
+            
+            copy.Prescriptions.Clear();
+            if (this.Prescriptions != null)
+            {
+                foreach (var p in this.Prescriptions)
+                {
+                    copy.Prescriptions.Add(p.Duplicate());
+                }
+            }
+
+            return copy;
         }
 
         private void Load()

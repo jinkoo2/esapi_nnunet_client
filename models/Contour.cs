@@ -17,6 +17,11 @@ namespace nnunet_client.models
             set => SetProperty<string>(ref _id, value);
         }
 
+        public Contour Duplicate() => new Contour()
+        {
+            Id = this.Id
+        };
+
         public override string ToString()=> $"Id: {Id}";
 
     }

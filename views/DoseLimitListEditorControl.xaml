@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:local="clr-namespace:nnunet_client.views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -12,6 +13,21 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/StandardStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            
+            <!--Style for Menu buttons inside the Popup -->
+            <Style x:Key="PopupMenuItemStyle" TargetType="{x:Type Button}">
+                <Setter Property="Background" Value="White"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="10,5"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="Width" Value="150"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#E0E0E0"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
         </ResourceDictionary>
     </UserControl.Resources>
     
@@ -25,13 +41,94 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBox Grid.Row="0"
-           FontWeight="Bold"
-           FontSize="20"
-           HorizontalAlignment="Center"
-           Margin="0,5,0,5"
-                 Padding="5"
-           Text="{Binding Title}"/>
+        <!-- Title Header with Menu-->
+        <Border Grid.Row="0"
+                Background="#CCCCCC"
+                CornerRadius="5"
+                Margin="5,5,5,10">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Left Icon -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- Center TextBox (Stretching) -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Right Menu (ToggleButton) -->
+                </Grid.ColumnDefinitions>
+
+                <!-- 1. Left Icon -->
+                <iconPacks:PackIconMaterial Grid.Column="0" 
+                                            Kind="Check" 
+                                            Width="20" Height="20" 
+                                            VerticalAlignment="Center"
+                                            Foreground="#333333"
+                                            Margin="10,5,5,5"/>
+
+                <!-- 2. Center Editable Label (TextBox) -->
+                <!-- Background is set to Transparent so the Border's rounded background shows through -->
+                <TextBox Grid.Column="1" 
+                         FontWeight="Bold"
+                         FontSize="20"
+                         HorizontalAlignment="Stretch"
+                         HorizontalContentAlignment="Center"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Margin="0,5,0,5"
+                         Padding="5"
+                         Text="{Binding Title}"/>
+
+                <!-- 3. Right Hamburger Dropdown Menu using ToggleButton and Popup -->
+                <ToggleButton x:Name="HamburgerToggle"
+                              Grid.Column="2" 
+                              VerticalAlignment="Center"
+                              Margin="0,0,5,0"
+                              Padding="5"
+                              ToolTip="Menu Options">
+
+                    <iconPacks:PackIconMaterial Kind="Menu" 
+                                                Width="20" Height="20" />
+                </ToggleButton>
+
+                <!-- Popup for the Dropdown Menu (Opens when ToggleButton is Checked) -->
+                <Popup IsOpen="{Binding IsChecked, ElementName=HamburgerToggle}"
+                       AllowsTransparency="True"
+                       PlacementTarget="{Binding ElementName=HamburgerToggle}"
+                       Placement="Bottom"
+                       HorizontalOffset="-120"
+                       StaysOpen="False">
+
+                    <Border Background="White" 
+                            BorderBrush="#CCCCCC" 
+                            BorderThickness="1"
+                            CornerRadius="4">
+                        <StackPanel>
+                            <!-- Menu Items -->
+                            <Button ToolTip="Save to template list"
+                                    Visibility="{Binding SaveButtonVisibility}"
+                                    Command="{Binding SaveCommand}"
+                                    Style="{StaticResource PopupMenuItemStyle}">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconMaterial Kind="ContentSave" Margin="3" Height="15" Width="15" />
+                                    <TextBlock VerticalAlignment="Center" Margin="3"> Save to Template List</TextBlock>
+                                </StackPanel>
+                            </Button>
+
+                            <Button ToolTip="Load from template list"
+                                    Command="{Binding LoadCommand}"
+                                    Visibility="{Binding LoadButtonVisibility}"
+                                    Style="{StaticResource PopupMenuItemStyle}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <iconPacks:PackIconMaterial Kind="FolderOpen" Margin="3" Height="15" Width="15"/>
+                                    <TextBlock VerticalAlignment="Center" Margin="3"> Load from Template List</TextBlock>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Popup>
+            </Grid>
+        </Border>
+
 
         <TextBlock Grid.Row="1"
                    FontWeight="Bold"
@@ -54,16 +151,6 @@
             Grid.Row="4"
             />
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="5" >
 
-            <Button Content="Save"
-    Command="{Binding SaveCommand}"
-     Margin="5"
-    />
-            <Button Content="Load"
-     Command="{Binding LoadCommand}"
-     Margin="5"/>
-        </StackPanel>
-        
     </Grid>
 </UserControl>

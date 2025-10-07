@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:models="clr-namespace:nnunet_client.models"
              xmlns:System="clr-namespace:System;assembly=mscorlib"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              d:DesignHeight="1000" d:DesignWidth="1000"
              x:Name="rootControl">
@@ -21,17 +22,24 @@
             </Style>
 
             <Style x:Key="RowTextBoxStyle" TargetType="{x:Type TextBox}">
-                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="Padding" Value="5,0"/>
             </Style>
 
-            <Style x:Key="ResultTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource RowTextBlockStyle}">
-                <Setter Property="Foreground" Value="Green"/>
+            <Style x:Key="RowComboBoxStyle" TargetType="{x:Type ComboBox}">
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Style>
 
+            <Style x:Key="ResultTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource RowTextBlockStyle}">
                 <Style.Triggers>
+                    <!-- Trigger for "Pass" -->
+                    <DataTrigger Binding="{Binding Result}" Value="Pass">
+                        <Setter Property="Foreground" Value="Green" />
+                    </DataTrigger>
 
                     <!-- Trigger for "Fail" -->
-                    <!-- The DataTrigger binds directly to the 'Result' property of the row's data context -->
                     <DataTrigger Binding="{Binding Result}" Value="Fail">
                         <Setter Property="Foreground" Value="Red" />
                     </DataTrigger>
@@ -41,10 +49,9 @@
                         <Setter Property="Foreground" Value="Blue" />
                     </DataTrigger>
 
+
                 </Style.Triggers>
             </Style>
-
-
 
             <Style x:Key="LimitTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource RowTextBlockStyle}">
                 <Style.Triggers>
@@ -62,6 +69,18 @@
                 </Style.Triggers>
             </Style>
 
+            <Style x:Key="ToolBarButtonStyle" TargetType="{x:Type Button}">
+                <Setter Property="Width" Value="20"/>
+                <Setter Property="Height" Value="20"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="0"/>
+            </Style>
+
+            <Style x:Key="ToolBarIconStyle" TargetType="{x:Type iconPacks:PackIconMaterial}">
+                <Setter Property="Width" Value="10"/>
+                <Setter Property="Height" Value="10"/>
+            </Style>
+            
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -78,18 +97,18 @@
                   AutoGenerateColumns="False"
                   CanUserAddRows="False">
             <DataGrid.Columns>
-                
+
 
                 <DataGridTextColumn Header="ID"
                     Binding="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     ElementStyle="{StaticResource RowTextBlockStyle}"   
                     EditingElementStyle="{StaticResource RowTextBoxStyle}"   
                     Width="*"/>
-                
-                <DataGridTemplateColumn Header="Plan Contour">
+
+                <DataGridTemplateColumn Header="Plan Contour" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Contour.Id}" VerticalAlignment="Center" Margin="0, 4" />
+                            <TextBlock Text="{Binding Contour.Id}" Style="{StaticResource RowTextBlockStyle}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
@@ -98,7 +117,7 @@
                                 ItemsSource="{Binding DataContext.Contours, ElementName=rootControl}"
                                 DisplayMemberPath="Id"
                                 SelectedItem="{Binding Contour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                Margin="0, 4"      
+                                Style="{StaticResource RowComboBoxStyle}"
                                 />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
@@ -121,10 +140,12 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 -->
-                <DataGridTemplateColumn Header="Prescription">
+                <DataGridTemplateColumn Header="Prescription" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Prescription.Id}" VerticalAlignment="Center" Margin="0, 4" />
+                            <TextBlock 
+                                Text="{Binding Prescription.Id}" 
+                                Style="{StaticResource RowTextBlockStyle}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
@@ -133,7 +154,7 @@
                                 ItemsSource="{Binding DataContext.Prescriptions, ElementName=rootControl}"
                                 DisplayMemberPath="Id"
                                 SelectedItem="{Binding Prescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                Margin="0, 4"
+                                Style="{StaticResource RowComboBoxStyle}"
                                 />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
@@ -171,95 +192,41 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- Dose Limit Item Editor (hidden) -->
-        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,10,0,0">
-            <Grid Margin="5" Visibility="Collapsed">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Label Content="ID:" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox Text="{Binding SelectedDoseLimit.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Grid.Column="1" Margin="5"/>
-
-                <Label Content="Contour ID:" Grid.Column="2" VerticalAlignment="Center"/>
-                <TextBox Text="{Binding SelectedDoseLimit.ContourId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Grid.Column="3" Margin="5"/>
-
-                <Label Content="Contour Type:" Grid.Column="4" VerticalAlignment="Center"/>
-                <ComboBox Grid.Column="5" Margin="5"
-                          SelectedItem="{Binding SelectedDoseLimit.ContourType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          ItemsSource="{x:Static models:EnumHelper.DoseLimitContourTypes}" />
-
-                <Label Content="Limit:" Grid.Column="6" VerticalAlignment="Center"/>
-                <TextBox Text="{Binding SelectedDoseLimit.Limit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Grid.Column="7" Margin="5"/>
-
-                <Label Content="Comments:" Grid.Column="8" VerticalAlignment="Center"/>
-                <TextBox Text="{Binding SelectedDoseLimit.Comments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Grid.Column="9" Margin="5"/>
-            </Grid>
-
-            <!-- Comments -->
-            <!--
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0" Text="Notes:" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="1"
-                         Text="{Binding Comments, Mode=TwoWay}" 
-                         Margin="10"
-                         Padding="5"
-                         AcceptsReturn="True"
-                         TextWrapping="Wrap"
-                         VerticalScrollBarVisibility="Auto"
-                         HorizontalScrollBarVisibility="Auto"
-                         VerticalAlignment="Stretch"
-                         Height="30"/>
-            </Grid>
-            -->
-            <!-- Buttons -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="Add"
-                        Command="{Binding AddCommand}"
-                        Width="75"
-                        Margin="5"/>
-                <Button Content="Remove"
-                        Command="{Binding RemoveCommand}"
-                        Width="75"
-                        Margin="5"/>
-
-                <Button Content="Duplicate"
-                        Command="{Binding DuplicateCommand}"
-                        Width="75"
-                        Margin="5"/>
-
-                <Button Content="Save"
-                        Command="{Binding SaveCommand}"
-                        Visibility="{Binding SaveLoadButtonsVisibility}"
-                        Width="75"
-                        Margin="5"/>
-                <Button Content="Load"
-                        Command="{Binding LoadCommand}"
-                        Visibility="{Binding SaveLoadButtonsVisibility}"
-                        Width="75"
-                        Margin="5"/>
-            </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0">
+            <Button ToolTip="Add"
+			Command="{Binding AddCommand}"
+			Style="{StaticResource ToolBarButtonStyle}"
+            >
+                <iconPacks:PackIconMaterial Kind="Plus" Style="{StaticResource ToolBarIconStyle}"/>
+            </Button>
+            <Button ToolTip="Remove"
+			Command="{Binding RemoveCommand}"
+            Style="{StaticResource ToolBarButtonStyle}"
+			>
+                <iconPacks:PackIconMaterial Kind="Minus" Style="{StaticResource ToolBarIconStyle}" />
+            </Button>
+            <Button ToolTip="Duplicate"
+		Command="{Binding DuplicateCommand}"
+            Style="{StaticResource ToolBarButtonStyle}"
+		>
+                <iconPacks:PackIconMaterial Kind="ContentDuplicate" Style="{StaticResource ToolBarIconStyle}"/>
+            </Button>
+            <Button ToolTip="Save"
+            Command="{Binding SaveCommand}"
+            Style="{StaticResource ToolBarButtonStyle}"
+            Visibility="{Binding SaveLoadButtonsVisibility}"
+            >
+                <iconPacks:PackIconMaterial Kind="ContentSave" Style="{StaticResource ToolBarIconStyle}"/>
+            </Button>
+            <Button ToolTip="Load"
+             Command="{Binding LoadCommand}"
+            Style="{StaticResource ToolBarButtonStyle}"  
+            Visibility="{Binding SaveLoadButtonsVisibility}"
+            
+            >
+                <iconPacks:PackIconMaterial Kind="FolderOpen" Style="{StaticResource ToolBarIconStyle}"/>
+            </Button>
         </StackPanel>
-
-
 
     </Grid>
 </UserControl>

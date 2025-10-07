@@ -163,12 +163,12 @@ namespace nnunet_client.viewmodels
 
             LoadCommand = new RelayCommand(Load);
             SaveCommand = new RelayCommand(Save);
-            AddCommand = new RelayCommand(Add);
-            RemoveCommand = new RelayCommand(Remove, IsItemSelected);
-            DuplicateCommand = new RelayCommand(Duplicate, IsItemSelected);
+            AddCommand = new RelayCommand(AddItem);
+            RemoveCommand = new RelayCommand(RemoveItem, IsItemSelected);
+            DuplicateCommand = new RelayCommand(DuplicateItem, IsItemSelected);
         }
 
-        private void Add()
+        private void AddItem()
         {
             DoseLimit doselimit = new DoseLimit { Id = "New" };
 
@@ -180,7 +180,7 @@ namespace nnunet_client.viewmodels
             SelectedDoseLimit = DoseLimits.Last();
         }
 
-        private void Remove()
+        private void RemoveItem()
         {
             if (SelectedDoseLimit != null)
             {
@@ -188,7 +188,7 @@ namespace nnunet_client.viewmodels
             }
         }
 
-        private void Duplicate()
+        private void DuplicateItem()
         {
             if (SelectedDoseLimit != null)
             {
@@ -202,9 +202,44 @@ namespace nnunet_client.viewmodels
             return SelectedDoseLimit != null;
         }
 
+        public DoseLimitListViewModel Duplicate()
+        {
+            DoseLimitListViewModel copy = new DoseLimitListViewModel();
+            // dose limites
+            copy.DoseLimits.Clear();
+            if (this.DoseLimits != null)
+            {
+                foreach (var d in this.DoseLimits)
+                {
+                    copy.DoseLimits.Add(d.Duplicate());
+                }
+            }
+
+            // prescriptions
+            copy.Prescriptions.Clear();
+            if (this.Prescriptions != null)
+            {
+                foreach (var d in this.Prescriptions)
+                {
+                    copy.Prescriptions.Add(d.Duplicate());
+                }
+            }
+
+            // contours
+            copy.Contours.Clear();
+            if (this.Contours != null)
+            {
+                foreach (var d in this.Contours)
+                {
+                    copy.Contours.Add(d.Duplicate());
+                }
+            }
+
+            return copy;
+        }
+
         public void Load()
         {
-
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
 
@@ -213,22 +248,12 @@ namespace nnunet_client.viewmodels
                 try
                 {
                     string json = File.ReadAllText(openFileDialog.FileName);
-                    Console.WriteLine("==== json =========");
                     Console.WriteLine(json);
-                    Console.WriteLine("==== end of json =========");
 
                     DoseLimitListViewModel loaded = JsonConvert.DeserializeObject<DoseLimitListViewModel>(json);
 
                     // dose limites
-                    Console.WriteLine("Clerning DoseLimites....");
                     DoseLimits.Clear();
-
-                    Console.WriteLine("Loaded Data===>");
-                    Console.WriteLine(loaded.ToString());
-                    Console.WriteLine("<==== Loaded Data");
-
-                    Console.WriteLine($"number of loaded dose limites: {loaded.DoseLimits.Count}");
-
                     if (loaded.DoseLimits != null)
                     {
                         foreach (var d in loaded.DoseLimits)

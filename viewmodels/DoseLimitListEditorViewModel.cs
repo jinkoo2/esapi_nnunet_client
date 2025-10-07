@@ -22,6 +22,23 @@ namespace nnunet_client.viewmodels
         [JsonIgnore]  // not include in JSON
         public ICommand SaveCommand { get; }
 
+        private Visibility _saveButtonVisibility = Visibility.Visible;
+        [JsonIgnore]
+        public Visibility SaveButtonVisibility
+        {
+            get => _saveButtonVisibility;
+            set => SetProperty<Visibility>(ref _saveButtonVisibility, value);
+        }
+
+        private Visibility _loadButtonVisibility = Visibility.Visible;
+        [JsonIgnore]
+        public Visibility LoadButtonVisibility
+        {
+            get => _loadButtonVisibility;
+            set => SetProperty<Visibility>(ref _loadButtonVisibility, value);
+        }
+
+
         private string _title = "Dose Limits";
         [JsonProperty]  // include in JSON
         public string Title { 
@@ -89,6 +106,15 @@ namespace nnunet_client.viewmodels
             SaveCommand = new RelayCommand(Save);
         }
 
+        public DoseLimitListEditorViewModel Duplicate()
+        {
+            DoseLimitListEditorViewModel copy = new DoseLimitListEditorViewModel();
+            copy.Title = this.Title;
+            copy.DoseLimitListViewModel = this.DoseLimitListViewModel.Duplicate();
+            copy.PrescriptionListViewModel = this.PrescriptionListViewModel.Duplicate();
+
+            return copy;
+        }
 
         private void Load()
         {

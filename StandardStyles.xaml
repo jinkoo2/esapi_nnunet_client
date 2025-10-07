@@ -97,13 +97,9 @@
     
     <!-- Default DataGrid -->
     <Style TargetType="DataGrid">
-        <!--
-        <Setter Property="AlternatingRowBackground" Value="AliceBlue"/>
-        -->
         <Setter Property="BorderBrush" Value="#CCCCCC"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="MinRowHeight" Value="30"/>
-        
     </Style>
 
     

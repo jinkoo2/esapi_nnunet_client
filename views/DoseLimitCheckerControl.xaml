@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"    
              xmlns:esapiui ="clr-namespace:esapi.UI;assembly=esapi"    
              xmlns:local="clr-namespace:nnunet_client.views"
-             
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"    
              d:DesignHeight="600" d:DesignWidth="850">
 
@@ -63,10 +63,10 @@
                 <Separator Margin="0 0 0 16"/>
 
                 <!-- TEMPLATE MANAGEMENT SECTION HEADER -->
-                <TextBlock Text="DOSE TEMPLATES" Style="{StaticResource SectionHeaderStyle}"/>
+                <TextBlock Text="CONSTRAINTS" Style="{StaticResource SectionHeaderStyle}"/>
 
                 <!-- Select Dose Limit Template -->
-                <GroupBox Header="Templates" Padding="10">
+                <GroupBox Header="Dose Constraint Sets" Padding="10">
                     <StackPanel Orientation="Vertical">
 
                         <ListView
@@ -74,8 +74,7 @@
                             SelectedItem="{Binding SelectedDoseLimitListEditorViewModel}"
                             DisplayMemberPath="Title"
                             Margin="0 0 0 10"
-                            MinHeight="50"
-                            MaxHeight="180"
+                            MinHeight="150"
                             BorderBrush="#D0D0D0"
                             BorderThickness="1"
                             >
@@ -95,43 +94,58 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Buttons are laid out using a Grid -->
-                            <Button 
-                                    Grid.Column="0" 
-                                    Content="New" 
-                                    ToolTip="New"
-                                    Command="{Binding NewDoseLimitSetCommand}"
-                                />
-                            <Button 
-                                Grid.Column="1" 
-                                Content="Import from Templates..." 
-                                ToolTip="Import from Templates..." 
-                                Command="{Binding ImportTemplateCommand}"
-                                />
-                            <Button 
-                                Grid.Column="2" 
-                                Content="Save List" 
-                                ToolTip="Save List"
-                                Command="{Binding SaveDoseLimitListEditorViewModelListCommand}"
-                                />
+                            <Button ToolTip="Add"
+                                    Grid.Column="0"
+                                    Command="{Binding AddDoseLimitSetCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                        <iconPacks:PackIconMaterial Kind="Plus" Margin="3" Height="12" Width="12" />
+                                    </StackPanel>
+                            </Button>
+
+                            <Button ToolTip="Remove"
+                                    Grid.Column="1"
+                                    Command="{Binding RemoveDoseLimitSetCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconMaterial Kind="Minus" Margin="3" Height="12" Width="12" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button ToolTip="Duplicate"
+                                    Grid.Column="2"
+                                    Command="{Binding DuplicateDoseLimitSetCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconMaterial Kind="ContentCopy" Margin="3" Height="12" Width="12" />
+                                </StackPanel>
+                            </Button>
+                            
+                            <Button ToolTip="Save List"
+                                    Grid.Column="3"
+                                    Command="{Binding SaveDoseLimitListEditorViewModelListCommand}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <iconPacks:PackIconMaterial Kind="ContentSave" Margin="3" Height="12" Width="12"/>
+                                    </StackPanel>
+                            </Button>
+                            
                         </Grid>
+                        
+                        <Button  
+                            ToolTip="Import from Template List..."
+                            Command="{Binding ImportTemplateCommand}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <iconPacks:PackIconMaterial Kind="FolderOpen" Margin="3" Height="12" Width="12"/>
+                                <TextBlock VerticalAlignment="Center" Margin="3">Load from Template List...</TextBlock>
+                            </StackPanel>
+                        </Button>
+                        
                     </StackPanel>
                 </GroupBox>
 
-                <Separator Margin="0 16 0 16"/>
+               
 
-                <!-- COMMANDS SECTION HEADER -->
-                <TextBlock Text="ACTIONS" Style="{StaticResource SectionHeaderStyle}"/>
-
-                <!-- Command Button -->
-                <GroupBox Header="Evaluation" Padding="10">
-                    <Button 
-                        Command="{Binding EvaluateDoseLimitesCommand}"    
-                        Content="Evaluate Dose Limits"
-                        />
-                </GroupBox>
+               
             </StackPanel>
         </ScrollViewer>
 
