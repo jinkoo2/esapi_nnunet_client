@@ -19,11 +19,13 @@ using VMSHospital = VMS.TPS.Common.Model.API.Hospital;
 using nnunet_client.views;
 using System.Collections.ObjectModel;
 
+using System.ComponentModel;
+
 namespace nnunet_client
 {
-    public partial class ART : Window
+    public partial class BladderART : Window
     {
-        public ART(VMS.TPS.Common.Model.API.Application esapiApp)
+        public BladderART(VMS.TPS.Common.Model.API.Application esapiApp)
         {
             InitializeComponent();
 
@@ -60,8 +62,10 @@ namespace nnunet_client
                     var allImages3D = pt.Studies.SelectMany(study => study.Images3D).ToList();
                     ImageListControl.SetImages(allImages3D);
 
+                    AutoPlanControl.SetPatient(pt);
 
-                    AutoPlanControl.Patient = pt;
+                    
+                    
 
                     helper.log($"Now... select an image...");
                 }
@@ -73,7 +77,7 @@ namespace nnunet_client
                 helper.log($"You selected: {selectedImage.Id}");
 
                 AutoSegControl.SetImage(selectedImage);
-                AutoPlanControl.Image = selectedImage;
+                AutoPlanControl.SetImage(selectedImage);
 
                 // check image is tilted (acquired non-zero angle)
                 double direction00 = selectedImage.XDirection[0];
@@ -87,13 +91,46 @@ namespace nnunet_client
                 }
             };
 
+            //
+            DoseLimitEditorControl.DataContext = new viewmodels.DoseLimitListEditorViewModel();
+            _GetDoseLimitEditorViewModel().TemplateFilePath = @"G:\data_secure\_dose_limits\templates\bladder_art.json";
+
+
+            _GetAutoPlanlViewModel().PropertyChanged += HandleAutoPlanPropertyChanged;
+
             // log view controller
             //Logger.StartMonitoring(null);
             Logger.StartLogPolling(null);
             helper.Logger = Logger;
 
             helper.log("Now...select a patient...");
-            
+        }
+
+        private void HandleAutoPlanPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // Check which specific property changed (e.g., if you have multiple)
+            if (e.PropertyName == "Plan")
+            {
+                // Logic to execute when the property changes
+                Console.WriteLine($"-----Plan Changed to {_GetAutoPlanlViewModel().Plan?.Id}-------------");
+
+                _GetDoseLimitEditorViewModel().Plan = _GetAutoPlanlViewModel().Plan;
+            }
+        }
+
+        private void BladderART_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private viewmodels.BladderAutoPlanViewModel _GetAutoPlanlViewModel()
+        {
+            return (viewmodels.BladderAutoPlanViewModel)AutoPlanControl.DataContext;
+        }
+
+        private viewmodels.DoseLimitListEditorViewModel _GetDoseLimitEditorViewModel()
+        {
+            return (viewmodels.DoseLimitListEditorViewModel) DoseLimitEditorControl.DataContext;
         }
 
         private void Window_Closed(object sender, EventArgs e)

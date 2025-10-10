@@ -21,7 +21,7 @@ namespace nnunet_client.viewmodels
     using System.Windows.Shapes;
 
     [JsonObject(MemberSerialization.OptIn)] // only include explicitly marked properties
-    public class PrescriptionListViewModel : INotifyPropertyChanged
+    public class PrescriptionListViewModel : BaseViewModel
     {
 
         // Commands that the UI buttons will bind to.
@@ -42,16 +42,8 @@ namespace nnunet_client.viewmodels
         [JsonIgnore]
         public Visibility SaveLoadButtonsVisibility
         {
-            get { return _saveLoadButtonsVisibility; }
-            set
-            {
-                if (_saveLoadButtonsVisibility != value)
-                {
-                    _saveLoadButtonsVisibility = value;
-
-                    OnPropertyChanged(nameof(SaveLoadButtonsVisibility));
-                }
-            }
+            get => _saveLoadButtonsVisibility;
+            set => SetProperty<Visibility>(ref _saveLoadButtonsVisibility, value);
         }
 
         private ObservableCollection<Prescription> _prescriptions;
@@ -59,11 +51,7 @@ namespace nnunet_client.viewmodels
         public ObservableCollection<Prescription> Prescriptions
         {
             get => _prescriptions;
-            set
-            {
-                _prescriptions = value;
-                OnPropertyChanged();
-            }
+            set => SetProperty<ObservableCollection<Prescription>>(ref _prescriptions, value);
         }
 
         private Prescription _selectedPrescription;

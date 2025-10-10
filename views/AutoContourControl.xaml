@@ -18,27 +18,27 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- Label for Selected Image Id -->
+        <GroupBox Header="Image" Grid.Row="0">
+            <Label Content = "{Binding Image.Id}"  Width="200" Padding="5" Margin="5"/>
+        </GroupBox>
 
-        <!-- Label for Selected Image Id --> 
-        <Label x:Name="ImageId"
-           Content="Image Not Loaded"
-           HorizontalAlignment="Left"
-           Grid.Row="0"
-           Margin="0 0 0 5"/>
-
-        
         <!-- ComboBox for templates -->
-        <ComboBox x:Name="TemplateSelector"
-              Grid.Row="1"
+        <ComboBox 
+            Grid.Row="1"  
+                ItemsSource="{Binding Templates}"
+                DisplayMemberPath="Name"
+                SelectedItem="{Binding SelectedTemplate}"
               HorizontalAlignment="Left"
               Width="300"
               Margin="0 0 0 5"
-              SelectionChanged="TemplateSelector_SelectionChanged" />
-
+              />
 
         <!-- Segmentation template editor -->
-        <local:SegmentationTemplateEditor x:Name="SegTemplateEditor"
-                                      Grid.Row="2"/>
+        <local:SegmentationTemplateEditor 
+            Grid.Row="2"
+            DataContext="{Binding SegmentationTemplateEditorViewModel}"
+            />
         
         <!--
         <Border Grid.Row="1" BorderBrush="Black" BorderThickness="2" Margin="5">

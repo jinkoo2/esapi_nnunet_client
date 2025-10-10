@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Shapes;
 
 namespace nnunet_client.viewmodels
 {
@@ -56,14 +57,12 @@ namespace nnunet_client.viewmodels
             }
             set
             {
-                if (value != _plan)
-                {
-                    Console.WriteLine($"DoseLimitListEditorViewModel - Setting a new plan...{_plan?.Id}");
-                    
-                    SetProperty<VMS.TPS.Common.Model.API.PlanningItem>(ref _plan, value);
+                if (value == _plan) return;
 
-                    DoseLimitListViewModel.Plan = _plan;
-                }
+                Console.WriteLine($"DoseLimitListEditorViewModel - Setting a new plan...{_plan?.Id}");
+                SetProperty<VMS.TPS.Common.Model.API.PlanningItem>(ref _plan, value);
+
+                DoseLimitListViewModel.Plan = _plan;
             }
         }
 
@@ -116,30 +115,57 @@ namespace nnunet_client.viewmodels
             return copy;
         }
 
-        private void Load()
+        private string _templateFilePath;
+        public string TemplateFilePath
+        {
+            get { return _templateFilePath; }
+            set {
+
+                if (_templateFilePath == value) return;
+
+                
+                SetProperty<string> (ref _templateFilePath, value);
+                Console.WriteLine($"TemplateFilePath ={TemplateFilePath} ");
+
+                if (_templateFilePath != null && File.Exists(_templateFilePath))
+                {
+                    Console.WriteLine("Loading Template");
+                    LoadFromTemplateFile(_templateFilePath);
+                }
+                else
+                {
+                    Console.WriteLine("TemplateFilePath is null or not found");
+                }
+            }
+        }
+
+        public void LoadFromTemplateFile(string templateFilePath)
+        {
+            Console.WriteLine($"loading from template file: {templateFilePath}...");
+
+            string json = File.ReadAllText(templateFilePath);
+            DoseLimitListEditorViewModel data = JsonConvert.DeserializeObject<DoseLimitListEditorViewModel>(json);
+
+            if (data != null)
+            {
+                this.Title = data.Title;
+                this.DoseLimitListViewModel = data.DoseLimitListViewModel;
+                this.PrescriptionListViewModel = data.PrescriptionListViewModel;
+            }
+        }
+
+        public void Load()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
 
             if (openFileDialog.ShowDialog() == true)
             {
-                string path = openFileDialog.FileName;
-                Console.WriteLine($"loading from {path}...");
-
-                string json = File.ReadAllText(path);
-                DoseLimitListEditorViewModel data = JsonConvert.DeserializeObject<DoseLimitListEditorViewModel>(json);
-
-                if (data != null)
-                {
-                    this.Title = data.Title;
-                    this.DoseLimitListViewModel = data.DoseLimitListViewModel;
-                    this.PrescriptionListViewModel = data.PrescriptionListViewModel;
-                }
-
+                TemplateFilePath = openFileDialog.FileName;
             }
         }
 
-        private void Save()
+        public void Save()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";

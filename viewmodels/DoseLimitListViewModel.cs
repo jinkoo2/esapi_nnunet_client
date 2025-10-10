@@ -15,6 +15,18 @@ using System.Windows.Input;
 using System.Windows;
 using System.Threading;
 
+using VMSCourse = VMS.TPS.Common.Model.API.Course;
+using VMSHospital = VMS.TPS.Common.Model.API.Hospital;
+using VMSImage = VMS.TPS.Common.Model.API.Image;
+using VMSPatient = VMS.TPS.Common.Model.API.Patient;
+using VMSPlanSetup = VMS.TPS.Common.Model.API.PlanSetup;
+using VMSReferencePoint = VMS.TPS.Common.Model.API.ReferencePoint;
+using VMSRegistration = VMS.TPS.Common.Model.API.Registration;
+using VMSSeries = VMS.TPS.Common.Model.API.Series;
+using VMSStructure = VMS.TPS.Common.Model.API.Structure;
+using VMSStructureSet = VMS.TPS.Common.Model.API.StructureSet;
+using VMSStudy = VMS.TPS.Common.Model.API.Study;
+
 namespace nnunet_client.viewmodels
 {
     [JsonObject(MemberSerialization.OptIn)] // only include explicitly marked properties
@@ -63,10 +75,7 @@ namespace nnunet_client.viewmodels
                 if (value != _plan)
                 {
                     Console.WriteLine($"DoseLimitListViewModel - Setting a new plan...{_plan?.Id}");
-
                     SetProperty<VMS.TPS.Common.Model.API.PlanningItem>(ref _plan, value);
-
-                    OnPropertyChanged(nameof(Contours));
 
                     // set plan to the dose limits
                     foreach (DoseLimit doseLimit in this.DoseLimits)
@@ -74,7 +83,15 @@ namespace nnunet_client.viewmodels
                         doseLimit.Plan = value;
                     }
 
-                    
+                    // update Contours
+                    if (_plan.StructureSet != null)
+                        Contours = new ObservableCollection<models.Contour>(_plan.StructureSet.Structures.Select(s => new models.Contour() { Id = s.Id }));
+                    else
+                        Contours = new ObservableCollection<models.Contour>();
+                }
+                else
+                {
+                    Contours = new ObservableCollection<models.Contour>();
                 }
             }
         }
@@ -112,16 +129,13 @@ namespace nnunet_client.viewmodels
             }
         }
 
+        private ObservableCollection<models.Contour> _contours;
+
         [JsonIgnore]  // not include in JSON
         public ObservableCollection<models.Contour> Contours
         {
-            get
-            {
-                if (_plan != null)
-                    return new ObservableCollection<models.Contour>(_plan.StructureSet.Structures.Select(s => new models.Contour() { Id = s.Id }));
-                else
-                    return new ObservableCollection<models.Contour>();
-            }
+            get => _contours;
+            set => SetProperty<ObservableCollection<models.Contour>>(ref _contours, value);
         }
 
 

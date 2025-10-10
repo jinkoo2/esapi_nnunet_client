@@ -9,6 +9,19 @@ using System.Text.RegularExpressions;
 using System.Windows.Media;
 using VMS.TPS.Common.Model.Types;
 
+using static esapi.esapi;
+using VMSCourse = VMS.TPS.Common.Model.API.Course;
+using VMSHospital = VMS.TPS.Common.Model.API.Hospital;
+using VMSImage = VMS.TPS.Common.Model.API.Image;
+using VMSPatient = VMS.TPS.Common.Model.API.Patient;
+using VMSPlanSetup = VMS.TPS.Common.Model.API.PlanSetup;
+using VMSReferencePoint = VMS.TPS.Common.Model.API.ReferencePoint;
+using VMSRegistration = VMS.TPS.Common.Model.API.Registration;
+using VMSSeries = VMS.TPS.Common.Model.API.Series;
+using VMSStructure = VMS.TPS.Common.Model.API.Structure;
+using VMSStructureSet = VMS.TPS.Common.Model.API.StructureSet;
+using VMSStudy = VMS.TPS.Common.Model.API.Study;
+
 namespace nnunet_client.models
 {
 
@@ -237,14 +250,27 @@ namespace nnunet_client.models
             get { return _plan; }
             set
             {
-                if (_plan != value)
+                if (_plan == value) return;
+                
+                Console.WriteLine($"DoseLimit: Setting a new plan... {_plan?.Id}");
+                SetProperty<VMS.TPS.Common.Model.API.PlanningItem>(ref _plan, value);
+
+                // if contour is not set, set one if found from the contour list
+                if(_contour == null)
                 {
-                    Console.WriteLine($"DoseLimit: Setting a new plan... {_plan?.Id}");
-
-                    SetProperty<VMS.TPS.Common.Model.API.PlanningItem>(ref _plan, value);
-
-                    Evaluate();
+                    if (_plan != null && _plan.StructureSet != null)
+                    {
+                        VMSStructure s_found = _plan.StructureSet.Structures.FirstOrDefault(s=> s.Id == Id);
+                        if (s_found != null)
+                        {
+                            Contour = new Contour() { Id = s_found.Id };
+                        }
+                    }
                 }
+
+                if(_plan != null)
+                    Evaluate();
+                
             }
         }
 

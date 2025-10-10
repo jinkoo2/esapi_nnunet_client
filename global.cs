@@ -18,6 +18,7 @@ using VMSHospital = VMS.TPS.Common.Model.API.Hospital;
 
 namespace nnunet_client
 {
+
     internal static class global
     {
         public static VMSPatient vmsPatient = null;
@@ -25,5 +26,14 @@ namespace nnunet_client
 
         public static string data_root_secure = @"G:\data_secure";
         public static bool make_export_log = false; // do not make export_log.
+
+        public static string nnunet_requester_id = "esapi_nnunet_client@varianEclipseTest";
+        public static string nnunet_request_user_name = "Jinkoo Kim";
+        public static string nnunet_request_user_email = "jinkoo.kim@stonybrookmedicine.edu";
+        public static string nnunet_request_user_institution = "Stony Brook";
+
+        public static string app_data_dir = @"C:\Users\jkim20\Documents\Eclipse Scripting API\Projects\esapi_nnunet_client\_data";
+        public static string nnunet_server_url = "http://127.0.0.1:8000";
+
     }
 }

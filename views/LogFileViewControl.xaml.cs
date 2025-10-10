@@ -48,7 +48,7 @@ namespace nnunet_client.views
 
         private void RefreshLogView()
         {
-            Console.WriteLine($"Polling...{_logFilePath}");
+            //Console.WriteLine($"Polling...{_logFilePath}");
 
             if (File.Exists(_logFilePath))
             {

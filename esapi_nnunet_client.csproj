@@ -237,7 +237,6 @@
   <ItemGroup>
     <Compile Include="App.xml.cs" />
     <Compile Include="bladder_art.cs" />
-    <Compile Include="ConstraintSet.cs" />
     <Compile Include="DoseLimitChecker.xaml.cs">
       <DependentUpon>DoseLimitChecker.xaml</DependentUpon>
     </Compile>
@@ -255,25 +254,25 @@
     <Compile Include="DoseLimitEditorWindow.xaml.cs">
       <DependentUpon>DoseLimitEditorWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TemplateManager.cs" />
-    <Compile Include="SegmentationTemplate.cs" />
+    <Compile Include="models\TemplateManager.cs" />
+    <Compile Include="models\SegmentationTemplate.cs" />
     <Compile Include="main.cs" />
-    <Compile Include="ART.xaml.cs">
-      <DependentUpon>ART.xaml</DependentUpon>
+    <Compile Include="BladderART.xaml.cs">
+      <DependentUpon>BladderART.xaml</DependentUpon>
     </Compile>
+    <Compile Include="viewmodels\AutoContourViewModel.cs" />
     <Compile Include="viewmodels\BaseViewModel.cs" />
+    <Compile Include="viewmodels\BladderAutoPlanViewModel.cs" />
     <Compile Include="viewmodels\DoseLimitListEditorViewModel.cs" />
     <Compile Include="viewmodels\DoseLimitListViewModel.cs" />
     <Compile Include="viewmodels\ListManagerViewModel.cs" />
     <Compile Include="viewmodels\RelayCommand.cs" />
+    <Compile Include="viewmodels\SegmentationTemplateEditorViewModel.cs" />
     <Compile Include="views\AutoContourControl.xaml.cs">
       <DependentUpon>AutoContourControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="views\AutoPlanControl.xaml.cs">
-      <DependentUpon>AutoPlanControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="views\ConstraintSetEditorControl.xaml.cs">
-      <DependentUpon>ConstraintSetEditorControl.xaml</DependentUpon>
+    <Compile Include="views\BladderAutoPlanControl.xaml.cs">
+      <DependentUpon>BladderAutoPlanControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="views\DoseLimitCheckerControl.xaml.cs">
       <DependentUpon>DoseLimitCheckerControl.xaml</DependentUpon>
@@ -311,7 +310,7 @@
     <None Include="_data\seg\templates\bladder_art.json" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="ART.xaml">
+    <Page Include="BladderART.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -331,11 +330,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="views\AutoPlanControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="views\ConstraintSetEditorControl.xaml">
+    <Page Include="views\BladderAutoPlanControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -22,6 +22,7 @@ using VMSSeries = VMS.TPS.Common.Model.API.Series;
 using VMSStructure = VMS.TPS.Common.Model.API.Structure;
 using VMSStructureSet = VMS.TPS.Common.Model.API.StructureSet;
 using VMSStudy = VMS.TPS.Common.Model.API.Study;
+using System.Windows.Documents.DocumentStructures;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
 [assembly: AssemblyVersion("1.0.0.1")]
@@ -51,6 +52,8 @@ namespace nnunet_client
             }
             catch (Exception e)
             {
+                // This catches exceptions thrown during VMSApplication setup or Execute() call.
+                Console.Error.WriteLine("--- ESAPI Main Exception ---");
                 Console.Error.WriteLine(e.ToString());
             }
         }
@@ -59,38 +62,57 @@ namespace nnunet_client
         static void Execute(VMS.TPS.Common.Model.API.Application vmsApp)
         {
 
-
-            //VMSPatient pt = vmsApp.OpenPatientById("30013645");
-            //VMSImage img = esapi.esapi.image_of_id("CBCT_9", pt);
-            //esapi.exporter.export_image(img, @"U:\temp2", "cbct_0");
-            //vmsApp.ClosePatient();
+            try
+            {
 
 
-            global.vmsApplication = vmsApp;
+
+                //VMSPatient pt = vmsApp.OpenPatientById("30013645");
+                //VMSImage img = esapi.esapi.image_of_id("CBCT_9", pt);
+                //esapi.exporter.export_image(img, @"U:\temp2", "cbct_0");
+                //vmsApp.ClosePatient();
 
 
-            string dataDir = System.Configuration.ConfigurationManager.AppSettings["data_dir"];
-            string templateDir = System.IO.Path.Combine(dataDir, "seg", "templates");
-            TemplateManager templateManager = new TemplateManager();
-            templateManager.LoadTemplates(templateDir);
+                global.vmsApplication = vmsApp;
+                
+                
+                var wpfApp = new App();
 
-            var wpfApp = new App();
+                // ---------------------------------------------------------------------
+                // CRITICAL FIX: Add a handler for exceptions occurring on the WPF UI thread (Dispatcher)
+                // This catches exceptions inside button clicks, data bindings, etc.
+                // ---------------------------------------------------------------------
+                wpfApp.DispatcherUnhandledException += (sender, e) =>
+                {
+                    // Mark the exception as handled to prevent the application from crashing immediately.
+                    e.Handled = true;
 
+                    Console.Error.WriteLine("--- WPF Dispatcher Exception!!! ---");
+                    Console.Error.WriteLine(e.Exception.ToString());
 
-            //var window = new nnunet_client.DoseLimitEditorWindow();
-            //wpfApp.Run(window);
+                    // Optionally show a user-friendly error message in a standard WPF MessageBox
+                     MessageBox.Show($"An unexpected error occurred: {e.Exception.Message}", 
+                                     "Application Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                };
 
-            var window = new nnunet_client.DoseLimitChecker(vmsApp);
-            wpfApp.Run(window);
+                //var window = new nnunet_client.DoseLimitEditorWindow();
+                //var window = new nnunet_client.DoseLimitChecker(vmsApp);
+                var window = new BladderART(vmsApp);
 
+                wpfApp.Run(window);
 
-            //var window = new nnunet_client.views.ConstraintSetEditorWindow();
-            //wpfApp.Run(window);
+                Console.WriteLine("done");
+            }
+            catch (Exception e)
+            {
+                // This catches exceptions thrown during the Execute method's setup phase, 
+                // but before the WPF Dispatcher takes over.
+                Console.Error.WriteLine("--- ESAPI Execute Exception ---");
+                Console.Error.WriteLine(e.ToString());
 
-            //var window = new ART(vmsApp);
-            //wpfApp.Run(window);
-
-            Console.WriteLine("done");
+                // Re-throw the exception so the main try/catch can log it if necessary
+                throw;
+            }
         }
 
     }

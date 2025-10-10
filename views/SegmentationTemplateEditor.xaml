@@ -23,11 +23,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="Template Name:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" FontWeight="Bold"/>
-            <TextBox x:Name="TemplateNameBox" Grid.Row="0" Grid.Column="1" Width="300" Margin="5 2" HorizontalAlignment="Left"/>
-
+            <TextBlock Text="Name:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" FontWeight="Bold"/>
+            <TextBox Text="{Binding Template.Name}" Grid.Row="0" Grid.Column="1" Width="300" Margin="5 2" HorizontalAlignment="Left"/>
             <TextBlock Text="Description:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" FontWeight="Bold"/>
-            <TextBox x:Name="DescriptionBox"
+            <TextBox Text="{Binding Template.Description}"
              Grid.Row="1" Grid.Column="1"
                      HorizontalAlignment="Left"
              Width="600" Height="60"
@@ -37,7 +36,7 @@
         </Grid>
 
 
-        <DataGrid x:Name="ContourListGrid"
+        <DataGrid ItemsSource="{Binding Template.ContourList}"
                   Grid.Row="2"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
