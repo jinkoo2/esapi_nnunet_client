@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Web.UI.HtmlControls;
 using System.Windows.Media;
 using VMS.TPS.Common.Model.Types;
 
@@ -47,6 +48,14 @@ namespace nnunet_client.models
         {
             get => _id;
             set => SetProperty(ref _id, value);
+        }
+
+        private int _priority=1;
+        [JsonProperty]
+        public int Priority
+        {
+            get => _priority;
+            set => SetProperty(ref _priority, value);
         }
 
         private Contour _contour;
@@ -167,64 +176,64 @@ namespace nnunet_client.models
                     case "Volume":
                         patterns = new[]
                         {
-                @"^V\d+(cGy|%)<\d+(cc|%)?$",
-                @"^V\d+(cGy|%)<\d+-\d+(cc|%)?$",
-                @"^V\d+(cGy|%)=\d+(cc|%)?$",
-                @"^V\d+(cGy|%)=\d+-\d+(cc|%)?$",
-                @"^V\d+(cGy|%)>\d+(cc|%)?$",
-                @"^V\d+(cGy|%)>\d+-\d+(cc|%)?$",
-                @"^V\d+(cGy|%)@(%|cc)$",
-                @"^V\d+(cGy|%)<~\d+(cc|%)?$",
-                @"^V\d+(cGy|%)<=~\d+(cc|%)?$"
-            };
+                            @"^V\d+(\.\d+)?(cGy|%)<\d+(\.\d+)?(cc|%)?$",
+                            @"^V\d+(\.\d+)?(cGy|%)<\d+(\.\d+)?-\d+(\.\d+)?(cc|%)?$",
+                            @"^V\d+(\.\d+)?(cGy|%)=\d+(\.\d+)?(cc|%)?$",
+                            @"^V\d+(\.\d+)?(cGy|%)=\d+(\.\d+)?-\d+(\.\d+)?(cc|%)?$",
+                            @"^V\d+(\.\d+)?(cGy|%)>\d+(\.\d+)?(cc|%)?$",
+                            @"^V\d+(\.\d+)?(cGy|%)>\d+(\.\d+)?-\d+(\.\d+)?(cc|%)?$",
+                            @"^V\d+(\.\d+)?(cGy|%)@(%|cc)$",
+                            @"^V\d+(\.\d+)?(cGy|%)<~\d+(\.\d+)?(cc|%)?$",
+                            @"^V\d+(\.\d+)?(cGy|%)<=~\d+(\.\d+)?(cc|%)?$"
+                        };
                         break;
 
                     case "Dose":
                         patterns = new[]
                         {
-                @"^D\d+(\.\d+)?(cc|%)<\d+(cGy|%)$",
-                @"^D\d+(\.\d+)?(cc|%)>\d+(cGy|%)$",
-                @"^D\d+(\.\d+)?(cc|%)=\d+(cGy|%)$",
-                @"^D\d+(\.\d+)?(cc|%)<\d+-\d+(cGy|%)$",
-                @"^D\d+(\.\d+)?(cc|%)>\d+-\d+(cGy|%)$",
-                @"^D\d+(\.\d+)?(cc|%)=\d+-\d+(cGy|%)$",
-                @"^D\d+(\.\d+)?(cc|%)@(%|cGy)$",
-                @"^D\d+(\.\d+)?(cc|%)<~\d+(cGy|%)$",
-                @"^D\d+(\.\d+)?(cc|%)<=~\d+(cGy|%)$"
-            };
+                            @"^D\d+(\.\d+)?(cc|%)<\d+(\.\d+)?(cGy|%)$",
+                            @"^D\d+(\.\d+)?(cc|%)>\d+(\.\d+)?(cGy|%)$",
+                            @"^D\d+(\.\d+)?(cc|%)=\d+(\.\d+)?(cGy|%)$",
+                            @"^D\d+(\.\d+)?(cc|%)<\d+(\.\d+)?-\d+(\.\d+)?(cGy|%)$",
+                            @"^D\d+(\.\d+)?(cc|%)>\d+(\.\d+)?-\d+(\.\d+)?(cGy|%)$",
+                            @"^D\d+(\.\d+)?(cc|%)=\d+(\.\d+)?-\d+(\.\d+)?(cGy|%)$",
+                            @"^D\d+(\.\d+)?(cc|%)@(%|cGy)$",
+                            @"^D\d+(\.\d+)?(cc|%)<~\d+(\.\d+)?(cGy|%)$",
+                            @"^D\d+(\.\d+)?(cc|%)<=~\d+(\.\d+)?(cGy|%)$"
+                        };
                         break;
 
                     case "Mean":
                         patterns = new[]
                         {
-                @"^Mean[<>=]\d+(cGy|%)$",
-                @"^Mean[<>=]\d+-\d+(cGy|%)$",
-                @"^Mean@(%|cGy)$",
-                @"^Mean<~\d+(cGy|%)$",
-                @"^Mean<=~\d+(cGy|%)$"
-            };
+                            @"^Mean[<>=]\d+(\.\d+)?(cGy|%)$",
+                            @"^Mean[<>=]\d+(\.\d+)?-\d+(\.\d+)?(cGy|%)$",
+                            @"^Mean@(%|cGy)$",
+                            @"^Mean<~\d+(\.\d+)?(cGy|%)$",
+                            @"^Mean<=~\d+(\.\d+)?(cGy|%)$"
+                        };
                         break;
 
                     case "Min":
                         patterns = new[]
                         {
-                @"^Min[<>=]\d+(cGy|%)$",
-                @"^Min[<>=]\d+-\d+(cGy|%)$",
-                @"^Min@(%|cGy)$",
-                @"^Min<~\d+(cGy|%)$",
-                @"^Min<=~\d+(cGy|%)$"
-            };
+                            @"^Min[<>=]\d+(\.\d+)?(cGy|%)$",
+                            @"^Min[<>=]\d+(\.\d+)?-\d+(\.\d+)?(cGy|%)$",
+                            @"^Min@(%|cGy)$",
+                            @"^Min<~\d+(\.\d+)?(cGy|%)$",
+                            @"^Min<=~\d+(\.\d+)?(cGy|%)$"
+                        };
                         break;
 
                     case "Max":
                         patterns = new[]
                         {
-                @"^Max[<>=]\d+(cGy|%)$",
-                @"^Max[<>=]\d+-\d+(cGy|%)$",
-                @"^Max@(%|cGy)$",
-                @"^Max<~\d+(cGy|%)$",
-                @"^Max<=~\d+(cGy|%)$"
-            };
+                            @"^Max[<>=]\d+(\.\d+)?(cGy|%)$",
+                            @"^Max[<>=]\d+(\.\d+)?-\d+(\.\d+)?(cGy|%)$",
+                            @"^Max@(%|cGy)$",
+                            @"^Max<~\d+(\.\d+)?(cGy|%)$",
+                            @"^Max<=~\d+(\.\d+)?(cGy|%)$"
+                        };
                         break;
 
                     default:
@@ -234,7 +243,7 @@ namespace nnunet_client.models
 
                 foreach (var pattern in patterns)
                 {
-                    if (System.Text.RegularExpressions.Regex.IsMatch(Limit, pattern))
+                    if (System.Text.RegularExpressions.Regex.IsMatch(Limit.Trim(), pattern, RegexOptions.CultureInvariant))
                         return true;
                 }
 
@@ -279,7 +288,7 @@ namespace nnunet_client.models
             Console.WriteLine("Evaluating dose limit...");
             if (_plan == null)
             {
-                this.ErrorMessage = "Plan is set.";
+                this.ErrorMessage = "Plan is not set.";
                 return;
             }
 
@@ -300,6 +309,8 @@ namespace nnunet_client.models
             if (!LimitValid)
             {
                 this.ErrorMessage = $"Limit string [{Limit}] is not valid";
+                this.Value = null;
+                this.Result = null;
                 return;
             }
 

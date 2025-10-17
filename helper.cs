@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,6 +51,19 @@ namespace nnunet_client
         {
             MessageBox.Show(message, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
+
+        public static void show_info_msg_box(string message)
+        {
+            MessageBox.Show(message, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+
+        public static bool show_yes_no_msg_box(string message)
+        {
+            MessageBoxResult result = MessageBox.Show(message, "Yes/No", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            return (result == MessageBoxResult.Yes);
+        }
+
 
         public static string join(string path1, string path2)
         {

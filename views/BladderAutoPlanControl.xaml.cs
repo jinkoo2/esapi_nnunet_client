@@ -23,28 +23,13 @@ namespace nnunet_client.views
     /// </summary>
     public partial class BladderAutoPlanControl : UserControl
     {
-        private viewmodels.BladderAutoPlanViewModel _viewmodel;
-
-        public BladderAutoPlanControl()
+         public BladderAutoPlanControl()
         {
             InitializeComponent();
 
-            _viewmodel = new viewmodels.BladderAutoPlanViewModel();
-
-            _viewmodel.DoseLimitListEditorViewModel = new viewmodels.DoseLimitListEditorViewModel() { Title = "Dose Constraints" };
+            //_viewmodel.DoseLimitListEditorViewModel = new viewmodels.DoseLimitListEditorViewModel() { Title = "Dose Constraints" };
            
-            this.DataContext = _viewmodel;
-        }
-
-        public void SetPatient(VMS.TPS.Common.Model.API.Patient patient)
-        {
-            _viewmodel.Patient = patient;
-        }
-
-
-        public void SetImage(VMS.TPS.Common.Model.API.Image image)
-        {
-            _viewmodel.Image = image;
+            this.DataContext = new viewmodels.BladderAutoPlanViewModel();
         }
 
     }

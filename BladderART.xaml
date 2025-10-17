@@ -3,44 +3,88 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:nnunet_client.views"
         xmlns:esapiui="clr-namespace:esapi.UI;assembly=esapi"
-        Title="Bladder ART" Height="640" Width="960"
+        Title="Bladder ART" Height="960" Width="1280"
         FontFamily="Arial" FontSize="12"
-        WindowState="Maximized"
         Closed="Window_Closed" >
 
     <Window.Resources>
 
-        <Style TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="LightGray" />
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="Margin" Value="5" />
-            <Setter Property="MinWidth" Value="100" />
-        </Style>
-        
-        <Style TargetType="{x:Type Label}">
-            <Setter Property="Background" Value="LightGray" />
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="Margin" Value="5" />
-            <Setter Property="MinWidth" Value="100" />
-        </Style>
+        <ResourceDictionary>
 
-        <Style TargetType="{x:Type Button}">
-            <Setter Property="Background" Value="LightGray" />
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="Margin" Value="5" />
-            <Setter Property="MinWidth" Value="100" />
-        </Style>
 
-        <Style TargetType="{x:Type TabItem}">
-            <Setter Property="Padding" Value="5" />
-        </Style>
-        
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="Background" Value="LightGray" />
+                <Setter Property="Padding" Value="5" />
+                <Setter Property="Margin" Value="5" />
+                <Setter Property="MinWidth" Value="100" />
+                <Setter Property="MinHeight" Value="25" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
 
+            <Style TargetType="{x:Type TextBox}">
+                <Setter Property="Background" Value="LightGray" />
+                <Setter Property="Padding" Value="5" />
+                <Setter Property="Margin" Value="5" />
+                <Setter Property="MinWidth" Value="100" />
+                <Setter Property="MinHeight" Value="25" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+
+            <Style TargetType="{x:Type Label}">
+                <Setter Property="Background" Value="LightGray" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="5" />
+                <Setter Property="MinWidth" Value="100" />
+                <Setter Property="Height" Value="25" />
+            </Style>
+
+
+            <Style TargetType="{x:Type ComboBox}">
+                <Setter Property="Background" Value="LightGray" />
+                <Setter Property="Padding" Value="5" />
+                <Setter Property="Margin" Value="5" />
+                <Setter Property="MinHeight" Value="25" />
+                <Setter Property="MinWidth" Value="75" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+            </Style>
+
+            <Style TargetType="{x:Type Button}">
+                <Setter Property="Padding" Value="10, 5" />
+                <Setter Property="Margin" Value="5" />
+                <Setter Property="Background" Value="#007ACC" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Foreground" Value="White" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#005a99" />
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter Property="Background" Value="#004d80" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- DataGrid -->
+            <Style TargetType="DataGrid">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="MinRowHeight" Value="30"/>
+            </Style>
+
+            <Style TargetType="{x:Type TabItem}">
+                <Setter Property="Padding" Value="5" />
+            </Style>
+
+        </ResourceDictionary>
     </Window.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            
+            <!-- splitter -->
+            <RowDefinition Height="5"/>
+            
             <RowDefinition Height="100" />
             
         </Grid.RowDefinitions>
@@ -53,32 +97,49 @@
                    />
 
         <TabControl Grid.Row="1">
-            <TabItem Header="Patient">
-                <StackPanel Margin="10" Orientation="Vertical">
-                    <esapiui:AutoCompleteTextBox x:Name="PatientSearchBox"
+            <TabItem Header="Patient/Image" Padding="5">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                        <GroupBox Grid.Row="0" Header="Select Patient" Padding="5" Width="300" HorizontalAlignment="Left">
+                            <esapiui:AutoCompleteTextBox x:Name="PatientSearchBox"
                                  Margin="0,0,0,10"
                                  HorizontalAlignment="Stretch"/>
+                        </GroupBox>
+<!-- 
+                    <GroupBox Grid.Row="1" Header="Select Image">
+                            <esapiui:ImageListUserControl x:Name="ImageListControl"
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Stretch" 
+                                 MinHeight="300"
+                            />
+                        </GroupBox>
+-->
+                    <GroupBox Grid.Row="1" Header="Select Image">
+                        <esapiui:ImageListDataGridControl
+                             x:Name="ImageListControl"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch" 
+                             MinHeight="300" />
+                    </GroupBox>
 
-                    
-                    <esapiui:PatientPropertyGridControl x:Name="PatientControl"
-                           HorizontalAlignment="Stretch"/>
-                   
-                    
-                </StackPanel>
-            </TabItem>
 
-            <!-- Image List -->
-            <TabItem Header="Images">
-                <Grid>
-                    <esapiui:ImageListUserControl x:Name="ImageListControl"
-                                     HorizontalAlignment="Stretch"
-                                     VerticalAlignment="Stretch" />
+
+                
+                
+                
                 </Grid>
             </TabItem>
 
+
+
             <!-- Auto Contour -->
             <TabItem Header="AutoContour">
-                <views:AutoContourControl x:Name="AutoSegControl"/>
+                <views:AutoContourControl x:Name="AutoContourControl"/>
             </TabItem>
 
             <!-- Auto Plan -->
@@ -100,7 +161,14 @@
 
         </TabControl>
 
-        <views:LogFileViewControl x:Name="Logger" Grid.Row="2"/>
+        <GridSplitter Grid.Row="2"
+                  Background="#DDDDDD"
+                  ShowsPreview="False"
+                  ResizeDirection="Rows"
+                  Height="5"
+                  HorizontalAlignment="Stretch"/>
+
+        <views:LogFileViewControl x:Name="Logger" Grid.Row="3"/>
 
     </Grid>
 </Window>

@@ -10,9 +10,6 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/StandardStyles.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
             
             <!--Style for Menu buttons inside the Popup -->
             <Style x:Key="PopupMenuItemStyle" TargetType="{x:Type Button}">
@@ -67,7 +64,9 @@
 
                 <!-- 2. Center Editable Label (TextBox) -->
                 <!-- Background is set to Transparent so the Border's rounded background shows through -->
-                <TextBox Grid.Column="1" 
+
+                <TextBox 
+                         Grid.Column="1" 
                          FontWeight="Bold"
                          FontSize="20"
                          HorizontalAlignment="Stretch"
@@ -77,6 +76,7 @@
                          Margin="0,5,0,5"
                          Padding="5"
                          Text="{Binding Title}"/>
+
 
                 <!-- 3. Right Hamburger Dropdown Menu using ToggleButton and Popup -->
                 <ToggleButton x:Name="HamburgerToggle"

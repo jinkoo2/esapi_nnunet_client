@@ -44,9 +44,15 @@ namespace nnunet_client.viewmodels
         [JsonProperty]  // include in JSON
         public string Title { 
             get=>_title;
-            set=>SetProperty<string>(ref _title, value);
+            set
+            {
+                if (_title == value) return;
+
+                SetProperty<string>(ref _title, value);
+            }
         }
 
+    
         private VMS.TPS.Common.Model.API.PlanningItem _plan;
         [JsonIgnore]  // not include in JSON
         public VMS.TPS.Common.Model.API.PlanningItem Plan

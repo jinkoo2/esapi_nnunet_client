@@ -92,8 +92,6 @@
         <Setter Property="BorderBrush" Value="#CCCCCC"/>
         <Setter Property="Height" Value="20"/>
     </Style>
-
-
     
     <!-- Default DataGrid -->
     <Style TargetType="DataGrid">

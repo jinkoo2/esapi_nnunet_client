@@ -1,11 +1,18 @@
-﻿using esapi;
+﻿using ControlzEx.Helpers;
+using esapi;
+using Newtonsoft.Json;
+using nnunet_client.models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
 using static esapi.esapi;
 using VMSCourse = VMS.TPS.Common.Model.API.Course;
 using VMSHospital = VMS.TPS.Common.Model.API.Hospital;
@@ -18,19 +25,30 @@ using VMSSeries = VMS.TPS.Common.Model.API.Series;
 using VMSStructure = VMS.TPS.Common.Model.API.Structure;
 using VMSStructureSet = VMS.TPS.Common.Model.API.StructureSet;
 using VMSStudy = VMS.TPS.Common.Model.API.Study;
-using Newtonsoft.Json;
-using System.Collections;
-using ControlzEx.Helpers;
-using nnunet_client.models;
 
 namespace nnunet_client.viewmodels
 {
     public class AutoContourViewModel : BaseViewModel
     {
-        // constructor
-        public AutoContourViewModel() {
+        public AutoContourViewModel()
+        {
             nnUNetServerURL = global.nnunet_server_url;
             helper.log($"nnUNetServerURL={nnUNetServerURL}");
+
+            // load templates
+            string dataDir = global.app_data_dir;
+            string templateDir = Path.Combine(dataDir, "seg", "templates");
+            if (!Directory.Exists(templateDir))
+            {
+                MessageBox.Show($"Template folder not found:\n{templateDir}",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            LoadTemplates(templateDir);
+
+            SubmitCommand = new RelayCommand(Submit);
+            CheckStatusCommand = new RelayCommand(CheckStatus);
+            ImportContoursCommand = new RelayCommand(ImportContours);
         }
 
         private VMSImage _image;
@@ -48,6 +66,14 @@ namespace nnunet_client.viewmodels
                     this.SegmentationTemplateEditorViewModel.Image = value;
             }
         }
+
+        private bool _processIdle = true;
+        public bool ProcessIdle
+        {
+            get => _processIdle;
+            set => SetProperty<bool>(ref _processIdle, value);
+        }
+
 
         private ObservableCollection<SegmentationTemplate> _templates;
         public ObservableCollection<SegmentationTemplate> Templates
@@ -82,6 +108,12 @@ namespace nnunet_client.viewmodels
             TemplateManager<SegmentationTemplate> templateManager = new TemplateManager<SegmentationTemplate>();
             templateManager.LoadTemplates(templateDir);
             Templates = templateManager.Templates;
+
+            // select the first template
+            if(Templates != null && Templates.Count > 0) 
+            {
+                SelectedTemplate = Templates[0];
+            }
         }
 
         private SegmentationTemplateEditorViewModel _segmentationTemplateEditorViewModel = new SegmentationTemplateEditorViewModel();
@@ -93,6 +125,8 @@ namespace nnunet_client.viewmodels
 
         public async Task SubmitPredictionRequests()
         {
+            helper.log("AutoContourViewModel().SubmitPredictionRequests()");
+
             // Ensure image is selected
             if (_image == null)
                 throw new Exception("Image not set");
@@ -212,7 +246,7 @@ namespace nnunet_client.viewmodels
 
         }
 
-        public async Task<Dictionary<string, string>> ImportPredictedContours()
+        public async Task<string[]> ImportPredictedContours()
         {
             helper.log("ImportContoursButton_Click()");
 
@@ -249,7 +283,7 @@ namespace nnunet_client.viewmodels
 
             global.vmsPatient.BeginModifications();
 
-            Dictionary<string, string> newContourIds = new Dictionary<string, string>();
+            List<string> importedContourIds = new List<string>();
             foreach (SegmentationTemplate.ContourItem contour in template.ContourList)
             {
                 helper.log($"Importing counter...Id={contour.Id}");
@@ -310,12 +344,12 @@ namespace nnunet_client.viewmodels
 
                     // contour name (increase number if exists)
                     string newContourId = contour.Id;
-                    int count = 1;
-                    while (esapi.esapi.s_of_id(newContourId, sset, false) != null)
-                    {
-                        newContourId = $"{contour.Id}_{count}";
-                        count++;
-                    }
+                    //int count = 1;
+                    //while (esapi.esapi.s_of_id(newContourId, sset, false) != null)
+                    //{
+                    //    newContourId = $"{contour.Id}_{count}";
+                    //    count++;
+                    //}
 
                     // Load points into StructureSet
                     string dicomType = string.IsNullOrEmpty(contour.Type) ? "ORGAN" : contour.Type;
@@ -327,7 +361,7 @@ namespace nnunet_client.viewmodels
                         structure.Color = contour.Color;  // Applies the template color to the structure
                         helper.log($"Loaded contour into StructureSet: {structure.Id}, color={contour.Color}");
 
-                        newContourIds.Add(contour.Id, newContourId);
+                        importedContourIds.Add(contour.Id);
                     }
                     else
                     {
@@ -343,11 +377,121 @@ namespace nnunet_client.viewmodels
 
             global.vmsApplication.SaveModifications();
 
-            helper.log($"Contours imported ({string.Join(",", newContourIds.Values)})");
-
-            return newContourIds;
+            helper.log($"Contours imported ({string.Join(",", importedContourIds)})");
+            
+            return importedContourIds.ToArray();
         }
 
+
+        private string _errorMessage = "";
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set => SetProperty<string>(ref _errorMessage, value);
+        }
+
+        public ICommand SubmitCommand { get; }
+        public ICommand CheckStatusCommand { get; }
+        public ICommand ImportContoursCommand { get; }
+
+        private void _err(string msg)
+        {
+            helper.log(msg);
+            MessageBox.Show(msg, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        private bool CheckInputs()
+        {
+            if (Image == null)
+            {
+                _err("Image not set. Please select an image.");
+                return false;
+            }
+
+            if (SelectedTemplate == null)
+            {
+                _err("Tempalte not set. Please select a template.");
+                return false;
+            }
+
+            return true;
+        }
+        public async void Submit()
+        {
+
+            if (!CheckInputs()) return;
+
+            ProcessIdle = false; // Block UI commands
+
+            try
+            {
+                helper.log("Submitting predicting request. Exporting an image can take a few minutes if not exported before...so be patient.");
+                await SubmitPredictionRequests();
+            }
+            catch (Exception ex)
+            {
+                helper.log($"Submission failed: {ex.Message}");
+                ErrorMessage = $"Operation Failed: {ex.Message}";
+            }
+            finally
+            {
+                ProcessIdle = true; // Unblock UI commands
+            }
+        }
+
+        public async void CheckStatus()
+        {
+            if (!CheckInputs()) return;
+
+            ProcessIdle = false; // Block UI commands
+
+            try
+            {
+                helper.log("Checking status...");
+                await this.SegmentationTemplateEditorViewModel.UpdateStatus();
+                helper.log("Done checking status.");
+            }
+            catch (Exception ex)
+            {
+                helper.log($"Submission failed: {ex.Message}");
+                ErrorMessage = $"Operation Failed: {ex.Message}";
+            }
+            finally
+            {
+                ProcessIdle = true; // Unblock UI commands
+            }
+        }
+
+        private ObservableCollection<string> _importedContourIds = new ObservableCollection<string>();
+        public ObservableCollection<string> ImportedContourIds
+        {
+            get => _importedContourIds;
+            set => SetProperty<ObservableCollection<string>>(ref _importedContourIds, value);
+        }
+
+        public async void ImportContours()
+        {
+            if (!CheckInputs()) return;
+
+            ProcessIdle = false; // Block UI commands
+
+            try
+            {
+                helper.log("Imporing contours can take a few minutes...so be patient.");
+                string[] importedContourIds = await ImportPredictedContours();
+                helper.log($"Done imporing contours[N={importedContourIds?.Count()}].");
+
+                this.ImportedContourIds = new ObservableCollection<string>(importedContourIds);
+            }
+            catch (Exception ex)
+            {
+                helper.log($"Submission failed: {ex.Message}");
+                ErrorMessage = $"Operation Failed: {ex.Message}";
+            }
+            finally
+            {
+                ProcessIdle = true; // Unblock UI commands
+            }
+        }
 
 
     }

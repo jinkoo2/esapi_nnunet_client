@@ -33,74 +33,12 @@ namespace nnunet_client.views
     {
         private Dictionary<string, SegmentationTemplate> _templates;
 
-                       
-        public Dictionary<string, string> NewContourIdDictionary;
-
-        private viewmodels.AutoContourViewModel _GetViewModel()
-        {
-            return (viewmodels.AutoContourViewModel)this.DataContext;
-        }
-
-        // for backword compatibility
-        public void SetImage(VMSImage image)
-        {
-            _GetViewModel().Image = image;
-        }
-
         public AutoContourControl()
         {
             InitializeComponent();
             
             this.DataContext = new viewmodels.AutoContourViewModel();
-
-            // load templates
-            string dataDir = System.Configuration.ConfigurationManager.AppSettings["data_dir"];
-            string templateDir = Path.Combine(dataDir, "seg", "templates");
-            if (!Directory.Exists(templateDir))
-            {
-                MessageBox.Show($"Template folder not found:\n{templateDir}",
-                                "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            _GetViewModel().LoadTemplates(templateDir);
         }
 
-        private async void CheckStatusButton_Click(object sender, RoutedEventArgs e)
-        {
-
-            if (_GetViewModel().Image == null || _GetViewModel().SelectedTemplate == null)
-            {
-                MessageBox.Show("No image or template selected.");
-                return;
-            }
-
-            await _GetViewModel().SegmentationTemplateEditorViewModel.UpdateStatus();
-        }
-
-        private async void SubmitButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_GetViewModel().Image == null || _GetViewModel().SelectedTemplate == null)
-            {
-                MessageBox.Show("No image or template selected.");
-                return;
-            }
-
-            MessageBox.Show("Exporting an image can take a few minutes if not exported before...so be patient.");
-            
-            await _GetViewModel().SubmitPredictionRequests();
-            
-            helper.log("OK. Done submitting the image for AutoContour!");
-        }
-
-
-        private async void ImportContoursButton_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Imporing contours can take a few minutes...so be patient.");
-
-            this.NewContourIdDictionary = await _GetViewModel().ImportPredictedContours();
-
-            MessageBox.Show("Done imporing contours[N=].");
-
-        }
     }
 }

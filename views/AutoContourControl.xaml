@@ -10,22 +10,24 @@
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800" MinHeight="100" MinWidth="100">
 
+   
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Label for Selected Image Id -->
         <GroupBox Header="Image" Grid.Row="0">
-            <Label Content = "{Binding Image.Id}"  Width="200" Padding="5" Margin="5"/>
+            <Label Content = "{Binding Image.Id}"  Width="200" HorizontalAlignment="Left"/>
         </GroupBox>
 
         <!-- ComboBox for templates -->
-        <ComboBox 
-            Grid.Row="1"  
+        <GroupBox Header="Contour Template" Grid.Row="1">
+            <ComboBox 
                 ItemsSource="{Binding Templates}"
                 DisplayMemberPath="Name"
                 SelectedItem="{Binding SelectedTemplate}"
@@ -33,7 +35,7 @@
               Width="300"
               Margin="0 0 0 5"
               />
-
+        </GroupBox>
         <!-- Segmentation template editor -->
         <local:SegmentationTemplateEditor 
             Grid.Row="2"
@@ -50,9 +52,19 @@
     
         <!-- buttons-->
         <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="10" HorizontalAlignment="Center">
-            <Button x:Name="SubmitButton" Click="SubmitButton_Click" MinWidth="100" Margin="10,5" Padding="5">Submit</Button>
-            <Button x:Name="CheckStatusButton" Click="CheckStatusButton_Click" MinWidth="100" Margin="10,5" Padding="5">Check Status</Button>
-            <Button x:Name="ImportContoursButton" Click="ImportContoursButton_Click" MinWidth="100" Margin="10,5" Padding="5">Import Contours</Button>
+            <Button x:Name="SubmitButton" 
+                    Command="{Binding SubmitCommand}" 
+                    IsEnabled="{Binding ProcessIdle}"
+                    MinWidth="100" Margin="10,5" Padding="5">Submit</Button>
+            <Button x:Name="CheckStatusButton" 
+                    Command="{Binding CheckStatusCommand}"
+                    IsEnabled="{Binding ProcessIdle}"
+                    MinWidth="100" Margin="10,5" Padding="5">Check Status</Button>
+            <Button x:Name="ImportContoursButton" 
+                    Command="{Binding ImportContoursCommand}"
+                    IsEnabled="{Binding ProcessIdle}"
+                    MinWidth="100" Margin="10,5" Padding="5">Import Contours</Button>
         </StackPanel>
+        <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" Grid.Row="4"/>
     </Grid>
 </UserControl>

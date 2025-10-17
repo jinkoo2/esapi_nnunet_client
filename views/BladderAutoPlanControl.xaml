@@ -10,8 +10,9 @@
 
     <UserControl.Resources>
         <Style x:Key="NumberTextBoxStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Width" Value="100"/>
-            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="Width" Value="50"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Padding" Value="0" />
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
@@ -22,16 +23,6 @@
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="Margin" Value="0,0,0,5"/>
         </Style>
-
-        <!-- Style applied to all heading labels in the grid -->
-        <Style TargetType="{x:Type ComboBox}">
-            <Setter Property="Foreground" Value="#2c3e50"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="MinWidth" Value="100"/>
-        </Style>
-        
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -40,11 +31,12 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" Orientation="Horizontal">
-             
+
 
                 <!-- Image/StructureSet Label -->
                 <GroupBox Header="Image/StructureSet">
@@ -70,157 +62,133 @@
                             SelectedItem="{Binding Rectum}"
                             />
 
-                                                <ComboBox
+                        <ComboBox
                             ItemsSource="{Binding StructureSet.Structures}"
                             DisplayMemberPath="Id"
                             SelectedItem="{Binding Bowel}"
                             />
-                      
+
                     </StackPanel>
                 </GroupBox>
 
             </StackPanel>
-            
+
             <!-- PTV -->
             <GroupBox Header="PTV" Grid.Row="1">
 
-                <TabControl Margin="10" BorderBrush="#ccc" BorderThickness="1">
+                <StackPanel Orientation="Vertical">
 
-                    <!-- Tab : Create -->
-                    <TabItem Header="Create" Padding="10,5">
-                        <Grid Margin="10" Background="#f7f7f7" HorizontalAlignment="Left">
-
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- ====================== COLUMN 0: New PTV ID ====================== -->
-                            <Label Grid.Row="0" Grid.Column="0" 
-Content="New PTV ID" 
-Style="{StaticResource InputLabelStyle}"/>
-                            <TextBox Grid.Row="1" Grid.Column="0" 
-  Text="{Binding NewPTVId}"/>
-
-                            <!-- ====================== COLUMN 1: PTV Margin1 All ====================== -->
-                            <Label Grid.Row="0" Grid.Column="1" 
-Content="PTV Margin1 All" 
-Style="{StaticResource InputLabelStyle}"/>
-                            <TextBox Grid.Row="1" Grid.Column="1" 
-  Text="{Binding PTVMargin1All}" 
-  Style="{StaticResource NumberTextBoxStyle}"/>
-
-                            <!-- ====================== COLUMN 2: PTV Margin2 Inf ====================== -->
-                            <Label Grid.Row="0" Grid.Column="2" 
-Content="PTV Margin2 Inf" 
-Style="{StaticResource InputLabelStyle}"/>
-                            <TextBox Grid.Row="1" Grid.Column="2" 
-  Text="{Binding PTVMargin2Inf}" 
-  Style="{StaticResource NumberTextBoxStyle}"/>
-
-                            <!-- ====================== COLUMN 3: Crop By Body Inner Margin ====================== -->
-                            <Label Grid.Row="0" Grid.Column="3" 
-Content="Crop By Body Inner Margin" 
-Style="{StaticResource InputLabelStyle}"/>
-                            <TextBox Grid.Row="1" Grid.Column="3" 
-  Text="{Binding CropByBodyInnerMargin}" 
-  Style="{StaticResource NumberTextBoxStyle}"/>
-
-                            <!-- ====================== COLUMN 4: Create Button ====================== -->
-                            <Button Grid.Row="1" Grid.Column="4"
-                                 Command="{Binding MakePTVCommand}"
-                                 Content="Create" 
-                                 Width="150"
-                                 Padding="10,5"
-                                 Margin="20,10,0,0"
-                                 Background="#007ACC"
-                                 Foreground="White"
-                                 FontWeight="Bold"
-                                 BorderThickness="0"
+                    <!-- selected or created PTV-->
+                    <ComboBox
+                                ItemsSource="{Binding StructureSet.Structures}"
+                                DisplayMemberPath="Id"
+                                SelectedItem="{Binding PTV}"
+                                Width="150"
                             />
 
-                        </Grid>
-                    </TabItem>
-                    
-                    <!-- Tab : Select -->
-                    <TabItem Header="Select" Padding="10,5">
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="{Binding PTV.Id}"  Width="150"/>
-                            <ComboBox
-                            ItemsSource="{Binding StructureSet.Structures}"
-                            DisplayMemberPath="Id"
-                            SelectedItem="{Binding PTV}"
-                            Width="150"
-                            Margin="5"
-                        />
-                        </StackPanel>
 
-                    </TabItem>
+                    <TabControl Margin="10" BorderBrush="#ccc" BorderThickness="1">
 
-                    
-                </TabControl>
-               
+                        <!-- Tab : Create -->
+                        <TabItem Header="Create" Padding="10,5">
+                            <Grid Margin="10" Background="#f7f7f7" HorizontalAlignment="Left">
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- ====================== COLUMN 0: New PTV ID ====================== -->
+                                <Label Grid.Row="0" Grid.Column="0" 
+                                Content="New PTV ID" 
+                                Style="{StaticResource InputLabelStyle}"/>
+                                <TextBox Grid.Row="1" Grid.Column="0" 
+                                  Text="{Binding NewPTVId}"/>
+
+                                <!-- ====================== COLUMN 1: PTV Margin1 All ====================== -->
+                                <Label Grid.Row="0" Grid.Column="1" 
+                                    Content="PTV Margin1 All" 
+                                    Style="{StaticResource InputLabelStyle}"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" 
+                                      Text="{Binding PTVMargin1All}" 
+                                      Style="{StaticResource NumberTextBoxStyle}"/>
+
+                                <!-- ====================== COLUMN 2: PTV Margin2 Inf ====================== -->
+                                <Label Grid.Row="0" Grid.Column="2" 
+                                    Content="PTV Margin2 Inf" 
+                                    Style="{StaticResource InputLabelStyle}"/>
+                                <TextBox Grid.Row="1" Grid.Column="2" 
+                                      Text="{Binding PTVMargin2Inf}" 
+                                      Style="{StaticResource NumberTextBoxStyle}"/>
+
+                                <!-- ====================== COLUMN 3: Crop By Body Inner Margin ====================== -->
+                                <Label Grid.Row="0" Grid.Column="3" 
+                                    Content="Crop By Body Inner Margin" 
+                                    Style="{StaticResource InputLabelStyle}"/>
+                                <TextBox Grid.Row="1" Grid.Column="3" 
+                                      Text="{Binding CropByBodyInnerMargin}" 
+                                      Style="{StaticResource NumberTextBoxStyle}"/>
+
+                                <!-- ====================== COLUMN 4: Create Button ====================== -->
+                                <Button Grid.Row="1" Grid.Column="4"
+                                     Command="{Binding MakePTVCommand}"
+                                     Content="Create" 
+                                     Width="150"
+                                    />
+
+                            </Grid>
+                        </TabItem>
+
+                    </TabControl>
+                </StackPanel>
+
+            </GroupBox>
+
+            <!-- Course -->
+            <GroupBox Header="Course" Grid.Row="2" Width="200" HorizontalAlignment="Left">
+                <ComboBox
+                     ItemsSource="{Binding Patient.Courses}"
+                     DisplayMemberPath="Id"
+                     SelectedItem="{Binding Course}"
+                     Width="150"
+                 />
             </GroupBox>
 
             <!-- Plan-->
-            <GroupBox Header="Plan" Grid.Row="2">
+            <GroupBox Header="Plan" Grid.Row="3">
                 <StackPanel Orientation="Vertical">
-                    <!-- Course -->
-                    <GroupBox Header="Course" Width="200" HorizontalAlignment="Left">
-                        <ComboBox
-                             ItemsSource="{Binding Patient.Courses}"
-                             DisplayMemberPath="Id"
-                             SelectedItem="{Binding Course}"
-                             HorizontalContentAlignment="Left"
-                             Width="100"
-                         />
-                    </GroupBox>
+
 
                     <!-- Plan Create or Select -->
+                    <ComboBox 
+                        ItemsSource="{Binding Course.PlanSetups}"
+                        DisplayMemberPath="Id"
+                        SelectedItem="{Binding Plan}"
+                        Width="150"
+                        />
+
                     <TabControl Margin="10" BorderBrush="#ccc" BorderThickness="1">
                         <TabItem Header="Create" Padding="10,5">
 
                             <StackPanel Orientation="Horizontal">
-                                <Label Content="{Binding Plan.Id}" />
+                                <Label Content="New Plan ID:" HorizontalContentAlignment="Right" Background="White" />
+                                <TextBox Text="{Binding NewPlanId}" />
                                 <Button 
-                                Command="{Binding OptimizeCommand}"
-                                Content="Optimize" />
+                                Command="{Binding CreatePlanAndOptimizeCommand}"
+                                Content="Create Plan and Optimize" />
 
                             </StackPanel>
 
                         </TabItem>
-
-                        <TabItem Header="Select" Padding="10,5">
-                            <ComboBox 
-                                ItemsSource="{Binding Course.PlanSetups}"
-                                DisplayMemberPath="Id"
-                                SelectedItem="{Binding Plan}"
-                                Width="100"
-                                HorizontalContentAlignment="Left"
-                                HorizontalAlignment="Left"
-                                />
-                        </TabItem>
                     </TabControl>
-                    <!-- ====================== COLUMN 4: Create Button ====================== -->
-                    <Button Grid.Row="1" Grid.Column="4"
-                         Content="Check Dose Constrains" 
-                          HorizontalAlignment="Left"
-                         Width="150"
-                         Padding="10,5"
-                         Margin="20,10,0,0"
-                         Background="#007ACC"
-                         Foreground="White"
-                         FontWeight="Bold"
-                         BorderThickness="0"
-                     />
                 </StackPanel>
             </GroupBox>
 

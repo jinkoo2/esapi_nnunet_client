@@ -56,7 +56,7 @@ namespace nnunet_client
 
         private static void _info(string msg)
         {
-            Console.WriteLine(msg);
+            //Console.WriteLine(msg);
             helper.log(msg);
         }
 
@@ -1455,7 +1455,6 @@ namespace nnunet_client
                 _err("LMC Calculation Failed");
             }
 
-
             // Dose
             _info("calculating dose....");
             stopwatch.Restart();
@@ -1486,6 +1485,315 @@ namespace nnunet_client
             //    string out_file = in_file + ".with.dice.csv";
             //    append_dice(job_id, in_file, out_file);
             //}
+        }
+
+        public static async Task<ExternalPlanSetup> create_bladder_plan4(
+            VMSPatient pt,
+            VMSStructureSet sset,
+            VMSCourse course,
+            string ps_id,
+            string ptv_id,
+            string bladder_id,
+            string rectum_id,
+            string opti_rectum_id,
+            string bowel_id,
+            string opti_bowel_id,
+            int num_fxs,
+            double dose_per_fx,
+            string default_imaging_device_id,
+            string optimization_model,
+            string volume_dose_calculation_model,
+            int task_delay_milliseconds
+            )
+        {
+            _info("create_bladder_plan3()");
+
+            if (pt == null)
+            {
+                _err($"Patient is null");
+            }
+
+            if (sset == null)
+            {
+                _err($"StructureSet is null");
+            }
+
+            VMSImage ct = sset.Image;
+            if (ct == null)
+            {
+                _err($"image is null");
+            }
+
+            if (course == null)
+            {
+                _err($"Course is null");
+                return null;
+            }
+
+            double direction00 = ct.XDirection[0];
+            double direction11 = ct.YDirection[1];
+            double direction22 = ct.ZDirection[2];
+            double prod = direction00 * direction11 * direction22;
+            if (prod < 0.9999)
+            {
+                _err($"Image Tilted! direction product = {prod}");
+            }
+
+            double total_dose = num_fxs * dose_per_fx;
+
+            ExternalBeamMachineParameters machine = new ExternalBeamMachineParameters("SIL 21IX", "6X", 600, "STATIC", "");
+
+
+            // set default imaging device
+            if (ct.Series.ImagingDeviceId == null || ct.Series.ImagingDeviceId == "")
+            {
+                _info($"The image(series) does not have imaging device id set. Setting the given default imaging device id ({default_imaging_device_id})");
+                ct.Series.SetImagingDevice(default_imaging_device_id);
+            }
+
+            //////////////
+            /// ptv
+            Structure s_ptv = s_of_id(ptv_id, sset);
+            if (s_ptv == null)
+            {
+                _err($"Structure(Id={ptv_id}) not found");
+            }
+            _info($"s_ptv={s_ptv.Id}");
+
+
+            //////////////
+            /// bladder
+            Structure s_bladder = s_of_id(bladder_id, sset);
+            if (s_bladder == null)
+            {
+                _err($"Structure(Id={bladder_id}) not found");
+            }
+            _info($"s_bladder(ctv)={s_bladder.Id}");
+
+            ////////////
+            /// rectum 
+            Structure s_rectum = s_of_id(rectum_id, sset);
+            if (s_rectum == null)
+            {
+                _err($"Structure(Id={rectum_id}) not found");
+            }
+            _info($"s_rectum={s_rectum.Id}");
+
+            ////////////
+            /// bowel
+            Structure s_bowel = s_of_id(bowel_id, sset);
+            if (s_bowel == null)
+            {
+                _err($"Structure(Id={rectum_id}) not found");
+            }
+            _info($"s_bowel={s_bowel.Id}");
+
+
+            ///////////////////////
+            /// rectum for opti
+            Structure s_opti_rectum = s_of_id(opti_rectum_id, sset);
+            if (s_opti_rectum == null)
+            {
+                _err($"Structure(Id={opti_rectum_id}) not found");
+                return null;
+            }
+            _info($"s_opti_rectum={s_opti_rectum.Id}");
+
+            ///////////////////////
+            /// bowel for opti
+            Structure s_opti_bowel = s_of_id(opti_bowel_id, sset);
+            if (s_opti_bowel == null)
+            {
+                _err($"Structure(Id={opti_bowel_id}) not found");
+                return null;
+            }
+            _info($"s_opti_bowel={s_opti_bowel.Id}");
+
+            /////////
+            /// Body
+            Structure s_body = s_of_type_external(sset);
+            if (s_body == null || s_body.IsEmpty)
+            {
+                _info("Body not found. Creating one...");
+                SearchBodyParameters sbparam = sset.GetDefaultSearchBodyParameters();
+                s_body = sset.CreateAndSearchBody(sbparam);
+            }
+            _info($"s_body={s_body.Id}");
+
+
+            // beams (gantry angles)
+            int num_beams = 9;
+            int gantr_interval = 40;
+            int gantry_start = 0;
+            double[] Gs = new double[num_beams];
+            for (int g = 0; g < num_beams; g++)
+            {
+                double gantry_angle = gantry_start + gantr_interval * g;
+                if (gantry_angle >= 360)
+                    gantry_angle -= 360;
+
+                Gs[g] = gantry_angle;
+            }
+            _info($"Gantry angels={string.Join(", ", Gs)}");
+
+            ExternalPlanSetup ps = find_or_add_ext_ps(ps_id, sset, course);
+            if (ps == null)
+            {
+                _err($"Plan (Id={ps_id}) - failed to create nor find plan.");
+            }
+            _info($"ps={ps.Id}");
+
+            //new_ps.SetPrescription(ps.NumberOfFractions??0, ps.DosePerFraction, ps.TreatmentPercentage);
+            ps.SetPrescription(num_fxs, new DoseValue(dose_per_fx, DoseValue.DoseUnit.cGy), 1.0);
+
+            _info("Adding Beams...");
+            for (int b_index = 0; b_index < Gs.Length; b_index++)
+            {
+                VRect<double> jawPositions = new VRect<double>(5, 5, 5, 5);
+                double collimatorAngle = 30.0;
+                double gantryAngle = Gs[b_index];
+                double patientSupportAngle = 0.0;
+                VVector isocenter = s_ptv.CenterPoint;
+
+                string b_Id = $"{b_index+1}";
+                //Beam new_b = new_ps.AddMLCBeam(machine, cpt0.LeafPositions, cpt0.JawPositions, cpt0.CollimatorAngle, cpt0.GantryAngle, cpt0.PatientSupportAngle, b.IsocenterPosition);
+                Beam new_b = ps.AddStaticBeam(
+                    machine,
+                    jawPositions,
+                    collimatorAngle,
+                    gantryAngle,
+                    patientSupportAngle,
+                    isocenter
+                    );
+                new_b.Id = b_Id;
+
+                //BeamParameters bp = new_b.GetEditableParameters();
+
+                // fit Jaw to the new ptv
+                double jaw_margin_mm = 20.0; // large enough for IMRT
+                new_b.FitCollimatorToStructure(new FitToStructureMargins(jaw_margin_mm), s_ptv, true, true, false);
+
+                // fit MLC to the new ptv
+                //double mlc_margin_mm = 5.0;
+                //new_b.FitMLCToStructure(new FitToStructureMargins(mlc_margin_mm), new_ptv, false, JawFitting.FitToStructure, OpenLeavesMeetingPoint.OpenLeavesMeetingPoint_Middle, ClosedLeavesMeetingPoint.ClosedLeavesMeetingPoint_BankOne);
+
+                //new_b.Wedges.Add(new EnhancedDynamicWedge(new_b))
+                // MU
+                //mus.Add(b.Meterset.Value);
+                //mu_list.Add(new KeyValuePair<string, MetersetValue>(new_b.Id, new MetersetValue(b.Meterset.Value, b.Meterset.Unit)));
+
+                //m++;
+            }
+
+            // public void SetCalculationModel(
+            _info("Setting calculation models...");
+            ps.SetCalculationModel(CalculationType.PhotonOptimization, optimization_model);
+            ps.SetCalculationModel(CalculationType.PhotonVolumeDose, volume_dose_calculation_model);
+
+            // optimization
+            OptimizationSetup os = ps.OptimizationSetup;
+            //OptimizationNormalTissueParameter nto = os.AddAutomaticNormalTissueObjective(0.1);
+
+            // dose values
+            DoseValue dv_rx = new DoseValue(total_dose, DoseValue.DoseUnit.cGy);
+            DoseValue dv_rx_115p = new DoseValue(total_dose * 1.15, DoseValue.DoseUnit.cGy);
+            DoseValue dv_rx_50p = new DoseValue(total_dose * 0.5, DoseValue.DoseUnit.cGy);
+
+            // PTV
+            {
+                os.AddPointObjective(s_ptv, OptimizationObjectiveOperator.Lower, dv_rx, 100.0, 100.0);
+                os.AddPointObjective(s_ptv, OptimizationObjectiveOperator.Lower, dv_rx, 95.0, 200.0);
+                os.AddPointObjective(s_ptv, OptimizationObjectiveOperator.Upper, dv_rx_115p, 0.0, 100.0);
+            }
+
+            // opti Rectum
+            {
+                os.AddPointObjective(s_opti_rectum, OptimizationObjectiveOperator.Upper, dv_rx, 0.0, 100.0);
+                os.AddPointObjective(s_opti_rectum, OptimizationObjectiveOperator.Upper, dv_rx_50p, 50.0, 50.0);
+            }
+
+            // opti Bowel
+            {
+                os.AddPointObjective(s_opti_bowel, OptimizationObjectiveOperator.Upper, dv_rx, 0.0, 100.0);
+                os.AddPointObjective(s_opti_bowel, OptimizationObjectiveOperator.Upper, dv_rx_50p, 50.0, 50.0);
+            }
+
+            os.AddAutomaticNormalTissueObjective(100.0);
+
+            OptimizationOptionsIMRT optm_Options = new OptimizationOptionsIMRT(
+                300,//int maxIterations,
+                OptimizationOption.RestartOptimization,
+                OptimizationConvergenceOption.TerminateIfConverged,
+                OptimizationIntermediateDoseOption.UseIntermediateDose,
+                "" //string mlcId
+            );
+
+
+            _info("optimizing...");
+            await Task.Delay(task_delay_milliseconds);
+
+            Stopwatch stopwatch = new Stopwatch();
+            // intial optimization
+            stopwatch.Restart();
+            OptimizerResult opt_result = ps.Optimize(optm_Options);
+            stopwatch.Stop();
+            _info($"finished. Optimization took {(stopwatch.ElapsedMilliseconds / 1000.0 / 60.0).ToString("0.0")} minutes.");
+            await Task.Delay(task_delay_milliseconds);
+
+            //// push down rectum bowel slightly 
+            //OptimizationOptionsIMRT optm_Options2 = new OptimizationOptionsIMRT(
+            //    100,//int maxIterations,
+            //    OptimizationOption.ContinueOptimization,
+            //    OptimizationConvergenceOption.TerminateIfConverged,
+            //    OptimizationIntermediateDoseOption.NoIntermediateDose,
+            //    "" //string mlcId
+            //);
+
+            //// get the volume of the 50% dose
+            //os.AddPointObjective(s_opti_rectumbowel, OptimizationObjectiveOperator.Upper, dv_rx, 0.0, 100.0);
+            //ps.Optimize(optm_Options2);
+
+            if (!opt_result.Success)
+            {
+                _err($"Optimization Failed: {opt_result.ToString()}");
+            }
+
+            // LMC
+            _info("calculating LMC...");
+            await Task.Delay(task_delay_milliseconds);
+
+            bool fixedJaw = true;
+            LMCVOptions lmc_options = new LMCVOptions(fixedJaw);
+
+            stopwatch.Restart();
+            CalculationResult lmc_result = ps.CalculateLeafMotions(lmc_options);
+            stopwatch.Stop();
+            _info($"finished. LMC calculation took {(stopwatch.ElapsedMilliseconds / 1000.0 / 60.0).ToString("0.0")} minutes.");
+            await Task.Delay(task_delay_milliseconds);
+
+            if (!lmc_result.Success)
+            {
+                global.vmsApplication.ClosePatient();
+                _err("LMC Calculation Failed");
+            }
+
+            // Dose
+            _info("calculating dose....");
+            await Task.Delay(task_delay_milliseconds);
+
+            stopwatch.Restart();
+            CalculationResult dose_result = ps.CalculateDose();
+            stopwatch.Stop();
+            helper.log($"finished. It took {(stopwatch.ElapsedMilliseconds / 1000.0 / 60.0).ToString("0.0")} minutes.");
+            await Task.Delay(task_delay_milliseconds);
+
+            if (!dose_result.Success)
+            {
+                _err("Dose Calculation Failed");
+            }
+
+            _info("Done.");
+            return ps;
         }
 
         public static void create_bladder_plan2(

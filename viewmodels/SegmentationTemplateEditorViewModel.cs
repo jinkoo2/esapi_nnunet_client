@@ -23,6 +23,7 @@ using VMSStudy = VMS.TPS.Common.Model.API.Study;
 using Newtonsoft.Json;
 using System.Collections;
 using nnunet_client.models;
+using System.Collections.ObjectModel;
 
 namespace nnunet_client.viewmodels
 {
@@ -42,6 +43,7 @@ namespace nnunet_client.viewmodels
             set => SetProperty<VMSImage>(ref _image, value);
         }
 
+
         public async Task<dynamic> UpdateStatus()
         {
             if (_image == null)
@@ -55,6 +57,7 @@ namespace nnunet_client.viewmodels
                 //MessageBox.Show("Invalid template!");
                 return "ERROR";
             }
+
 
             string dataDir = global.app_data_dir;
             string casesDir = helper.join(helper.join(dataDir, "seg"), "cases");

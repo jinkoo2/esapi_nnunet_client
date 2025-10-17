@@ -10,13 +10,6 @@
              d:DesignHeight="600" d:DesignWidth="850">
 
 
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/StandardStyles.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </UserControl.Resources>
     
     <Grid>
         <Grid.ColumnDefinitions>

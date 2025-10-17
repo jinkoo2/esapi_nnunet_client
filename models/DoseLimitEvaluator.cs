@@ -145,10 +145,20 @@ namespace nnunet_client.models
         /// <exception cref="Exception">Thrown if an invalid operator is provided.</exception>
         public static Result Test(double value, string op, double? th1, double? th2)
         {
+            Console.WriteLine("Test()");
+            Console.WriteLine($"op={op}");
+            Console.WriteLine($"value={value}");
+            Console.WriteLine($"th1={th1}");
+            Console.WriteLine($"th2={th2}");
+
             if (th2 == null)
             {
-                if (op == ">") return value > th1 ? Result.Pass : Result.Fail;
-                if (op == "<") return value < th1 ? Result.Pass : Result.Fail;
+                if (op == ">")
+                {
+                    Console.WriteLine($"op=>, value > th1 ==> {value > th1}");
+                    return value >= th1 ? Result.Pass : Result.Fail;
+                }
+                if (op == "<") return value <= th1 ? Result.Pass : Result.Fail;
                 if (op == "=") return value == th1 ? Result.Pass : Result.Fail;
                 throw new Exception($"Invalid operator:{op}");
             }
@@ -156,19 +166,30 @@ namespace nnunet_client.models
             {
                 if (op == ">")
                 {
-                    if (value > th2) return Result.Pass;
-                    if (value > th1) return Result.Acceptable;
+                    if (value >= th2)
+                    {
+                        Console.WriteLine("value > th2 --> Pass");
+                        return Result.Pass;
+                    }
+
+                    if (value >= th1)
+                    {
+                        Console.WriteLine("value > th1 --> Acceptable");
+                        return Result.Acceptable;
+                    }
+
+                    Console.WriteLine("else, returning Fail");
                     return Result.Fail;
                 }
                 if (op == "<")
                 {
-                    if (value < th1) return Result.Pass;
-                    if (value < th2) return Result.Acceptable;
+                    if (value <= th1) return Result.Pass;
+                    if (value <= th2) return Result.Acceptable;
                     return Result.Fail;
                 }
                 if (op == "=")
                 {
-                    if (value > th1 && value < th2) return Result.Pass;
+                    if (value >= th1 && value <= th2) return Result.Pass;
                     return Result.Fail;
                 }
                 throw new Exception($"Invalid operator:{op}");
@@ -202,6 +223,8 @@ namespace nnunet_client.models
             if (Structure == null) throw new Exception("Structure is null");
             if (limitString == null) throw new Exception("limitString is null");
             if (limitString.Trim().Length == 0) throw new Exception("limitString is empty");
+
+            Console.WriteLine($"limitString={limitString}");
 
             if (limitString.StartsWith("Min") || limitString.StartsWith("Max") || limitString.StartsWith("Mean"))
             {
@@ -285,6 +308,8 @@ namespace nnunet_client.models
             else if (limitString.StartsWith("V"))
             {
                 (double? DNumber, string DUnit, string Operator, double? VNumber1, double? VNumber2, string VUnit) = VolumeMatch(limitString);
+                
+                Console.WriteLine($"DNumber: {DNumber}, DUnit: {DUnit}, Operator: {Operator}, VNumber1: {VNumber1}, VNumber2: {VNumber2}, VUnit: {VUnit}");
 
                 DoseValue dv;
                 if (DUnit == "%")

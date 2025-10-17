@@ -10,6 +10,12 @@ namespace nnunet_client.models
 
     public class SegmentationTemplate : BaseModel, INamedTemplate
     {
+        // constructor
+        public SegmentationTemplate() {
+
+
+        }
+
         private string _name;
         private string _description;
         private ObservableCollection<ContourItem> _contourList = new ObservableCollection<ContourItem>();
@@ -26,6 +32,20 @@ namespace nnunet_client.models
             get => _description;
             // Use SetProperty to set the backing field and raise PropertyChanged
             set => SetProperty(ref _description, value);
+        }
+
+        private ObservableCollection<string> _contourTypes = new ObservableCollection<string>() {
+                "ORGAN",
+                "PTV",
+                "CTV",
+                "GTV",
+                "BODY",
+                "None"
+            };
+        public ObservableCollection<string> ContourTypes
+        {
+            get => _contourTypes;
+            set => SetProperty<ObservableCollection<string>>(ref _contourTypes, value);
         }
 
         public ObservableCollection<ContourItem> ContourList
@@ -127,10 +147,30 @@ namespace nnunet_client.models
                 set => SetProperty(ref _modelLabelNumber, value);
             }
 
+            [JsonIgnore]
             public string Status
             {
                 get => _status;
-                set => SetProperty(ref _status, value);
+                set
+                {
+                    if (_status == value) return; 
+
+                    SetProperty(ref _status, value);
+                
+                    OnPropertyChanged(nameof(StatusCode));
+                }
+            }
+            
+            [JsonIgnore]
+            public string StatusCode
+            {
+                get
+                {
+                    if (_status != null && _status.ToLower().Contains("error"))
+                        return "ERROR";
+                    else
+                        return "";
+                }
             }
 
 

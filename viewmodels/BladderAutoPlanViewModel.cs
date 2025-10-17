@@ -34,30 +34,17 @@ namespace nnunet_client.viewmodels
     public class BladderAutoPlanViewModel : BaseViewModel
     {
         public ICommand MakePTVCommand { get; }
-        public ICommand ObtimizeCommand { get; }
+        public ICommand CreatePlanAndOptimizeCommand { get; }
 
 
         // construction
         public BladderAutoPlanViewModel()
         {
-            DoseLimitListEditorViewModel = new DoseLimitListEditorViewModel()
-            {
-                Title="Dose Limits"
-            };
-            
-
-            MakePTVCommand = new RelayCommand(MakePTV);
-            ObtimizeCommand = new RelayCommand(Optimize);
+            MakePTVCommand = new RelayCommand(CreatePTV);
+            CreatePlanAndOptimizeCommand = new RelayCommand(CreatePlanAndIOptimize);
         }
 
-        // dose limit editor
-        private DoseLimitListEditorViewModel _doseLimitListEditorViewModel;
-        public DoseLimitListEditorViewModel DoseLimitListEditorViewModel
-        {
-            get => _doseLimitListEditorViewModel;
-            set => SetProperty<DoseLimitListEditorViewModel>(ref _doseLimitListEditorViewModel, value);
-        }
-
+        
         private VMSPatient _patient = null;
         public VMSPatient Patient
         {
@@ -90,7 +77,11 @@ namespace nnunet_client.viewmodels
             {
                 if (_image == value)
                     return;
-                
+
+
+                helper.log($"Setting image[Id={_image?.Id}]");
+
+
                 SetProperty<VMSImage>(ref _image, value);
 
                 // update bladder/rectum/
@@ -104,14 +95,13 @@ namespace nnunet_client.viewmodels
                     }
                     else
                     {
+                        StructureSet = null;
                         helper.log("Image has no structure set.");
                     }
                 }
                 else
                 {
-                    Bladder = null;
-                    Rectum = null;
-                    Bowel= null;
+                    StructureSet=null;
                 }
             }
         }
@@ -186,7 +176,7 @@ namespace nnunet_client.viewmodels
 
 
 
-        private double _pTVMargin1All = 5.0; 
+        private double _pTVMargin1All = 3.0; 
         public double PTVMargin1All
         {
             get => _pTVMargin1All;
@@ -194,182 +184,362 @@ namespace nnunet_client.viewmodels
         }
 
 
-        private double _pTVMargin2Inf = 5.0; // 5mm inf
+        private double _pTVMargin2Inf = 3.0; // 5mm inf
         public double PTVMargin2Inf
         {
             get => _pTVMargin2Inf;
             set => SetProperty<double>(ref _pTVMargin2Inf, value);
         }
 
-        private string _pTVId = "ptv_5_10";
-        public string PTVId
+        private string _newPTVId = "PTV";
+        public string NewPTVId
         {
-            get => _pTVId;
-            set => SetProperty<string>(ref _pTVId, value);
+            get => _newPTVId;
+            set => SetProperty<string>(ref _newPTVId, value);
         }
        
-        
-        
         string _optiRectumId = "_opti_rectum";
         string _optiBowelId = "_opti_bowel";
 
         Color ptv_color = Color.FromRgb(255, 0, 0);
 
-        int num_fxs = 20;
-        double dose_per_fx = 275.0;
 
-        private void MakePTV()
+        private string _newPlanId = $"ART_{DateTime.Now.ToString("MMdd")}";
+        public string NewPlanId
+        {
+            get => _newPlanId;
+            set => SetProperty<string>(ref _newPlanId, value);
+        }
+
+        int _newPlanNumOfFractions = 20;
+        public int NewPlanNumOfFractions
+        {
+            get => _newPlanNumOfFractions;
+            set => SetProperty<int>(ref _newPlanNumOfFractions, value);
+        }
+        
+        double _newPlanDosePerFraction = 275;
+        public double NewPlanDosePerFraction
+        {
+            get => _newPlanDosePerFraction;
+            set => SetProperty<double>(ref _newPlanDosePerFraction, value);
+        }
+        public double NewPlanTotalDose
+        {
+            get => (_newPlanDosePerFraction * _newPlanDosePerFraction);
+        }
+
+        private void CreatePTV()
         {
             helper.log("MakePTV()");
 
             // course selected?
-            VMSCourse course = _course;
-            if (course == null)
-            {
-                helper.show_error_msg_box("Please select a course!");
-                return;
-            }
 
             VMSPatient pt = _patient;
-            helper.log($"Patient={pt.Id}");
-
-            VMSImage ct = _image;
-            helper.log($"Image={ct.Id}");
-            List<VMSStructureSet> sset_list = sset_list_of_image_id_FOR(ct.Id, ct.FOR, pt);
-            if (sset_list.Count == 0)
+            if (pt == null)
             {
-                helper.show_error_msg_box($"StructureSet not found for image (Id={ct.Id}, FOR={ct.FOR})");
+                helper.show_error_msg_box("Please select a patient!");
                 return;
             }
-            else if (sset_list.Count > 1)
+
+            VMSImage image = _image;
+            if (image == null)
             {
-                helper.show_error_msg_box($"More than 1 StructureSet found for image (Id={ct.Id}, FOR={ct.FOR})");
+                helper.show_error_msg_box("Please select an image!");
                 return;
             }
-            VMSStructureSet sset = sset_list[0];
-            helper.log($"StructureSet={sset.Id}");
 
-            // ptv already existing
-            VMSStructure ptv = esapi.esapi.s_of_id(_pTVId, sset);
-            if (ptv != null)
+            VMSStructureSet sset = StructureSet;
+            if (sset == null)
             {
-                helper.show_warning_msg_box($"PTV already exitsts (Id={_pTVId})");
-                this.PTV = ptv;
-                helper.log($"PTV={PTV.Id}");
+                helper.show_error_msg_box("Error - the selected image has no structureset!");
                 return;
             }
 
             // check bowel exists
-            VMSStructure bowel = esapi.esapi.s_of_id(bowel_id, sset);
-            if (bowel == null)
+            if (_bowel == null)
             {
-                helper.show_error_msg_box($"Bowel not found (Id={bowel_id})");
+                helper.show_error_msg_box($"Bowel not set!");
                 return;
             }
 
             // check rectum exists
-            VMSStructure rectum = esapi.esapi.s_of_id(rectum_id, sset);
-            if (rectum == null)
+            if (_rectum == null)
             {
-                helper.show_error_msg_box($"Rectum not found (Id={rectum_id})");
+                helper.show_error_msg_box($"Rectum not set!");
                 return;
             }
 
             // check bladder exists
-            VMSStructure bladder = esapi.esapi.s_of_id(bladder_id, sset);
-            if (bladder == null)
+            if (_bladder == null)
             {
-                helper.show_error_msg_box($"Bladder not found (Id={bladder_id})");
+                helper.show_error_msg_box($"Bladder not set!");
                 return;
+            }
+
+            // print
+            helper.log($"Patient={pt.Id}");
+            helper.log($"Image={image.Id}");
+            helper.log($"StructureSet={sset.Id}");
+            helper.log($"Bowel={_bowel.Id}");
+            helper.log($"Bladder={_bladder.Id}");
+            helper.log($"Rectum={_rectum.Id}");
+
+            // ptv already exists?
+            if (esapi.esapi.s_of_id(_newPTVId, sset) != null)
+            {
+                // override?
+                if (!helper.show_yes_no_msg_box($"PTV already exitsts (Id={_newPTVId}). Do you want to override?"))
+                    return;
             }
 
             _patient.BeginModifications();
 
+            // create ptv
             this.PTV = bladder_art.make_ptv(
                 pt,
                 sset,
-                ct,
-                bladder,
-                rectum,
-                bowel,
+                image,
+                _bladder,
+                _rectum,
+                _bowel,
                 _cropByBodyInnerMargin,
                 _pTVMargin1All,
                 _pTVMargin2Inf,
-                _pTVId,
+                _newPTVId,
                 ptv_color);
 
             helper.log("ptv created!");
 
-            helper.log("creating rectum/bowel optimization contours!");
-            var result = bladder_art.make_opti_contours(
-                sset,
-                this.PTV,
-                rectum,
-                bowel,
-                _optiRectumId,
-                _optiBowelId);
-
-
+            helper.log("Savign modifications...");
             global.vmsApplication.SaveModifications();
 
-            helper.log("opti contours created!");
+
+            // notify the structure set change
+            OnPropertyChanged(nameof(StructureSet));
+
+            helper.log("Done.");
+
+            return;
         }
 
-        private async void Optimize()
+        private bool CreateOptiContours()
         {
-            VMSPatient pt = this.Patient;
-            VMSImage ct = this.Image;
-            VMSStructureSet sset = this.StructureSet;
-            VMSCourse course = this.Course;
-            
-            if (pt == null || ct == null || sset == null || course == null)
+            helper.log("MakeOptiContours()");
+
+            // course selected?
+
+            VMSPatient pt = _patient;
+            if (pt == null)
             {
-                helper.show_error_msg_box("Missing required inputs.");
+                helper.show_error_msg_box("Please select a patient!");
+                return false;
+            }
+
+            VMSImage image = _image;
+            if (image == null)
+            {
+                helper.show_error_msg_box("Please select an image!");
+                return false;
+            }
+
+            VMSStructureSet sset = StructureSet;
+            if (sset == null)
+            {
+                helper.show_error_msg_box("Error - the selected image has no structureset!");
+                return false;
+            }
+
+            // check bowel exists
+            if (_bowel == null)
+            {
+                helper.show_error_msg_box($"Bowel not set!");
+                return false;
+            }
+
+            // check rectum exists
+            if (_rectum == null)
+            {
+                helper.show_error_msg_box($"Rectum not set!");
+                return false;
+            }
+
+            // PTV
+            if (_ptv == null)
+            {
+                helper.show_error_msg_box($"PTV not set!");
+                return false;
+            }
+
+            // print
+            helper.log($"Patient={pt.Id}");
+            helper.log($"Image={image.Id}");
+            helper.log($"StructureSet={sset.Id}");
+            helper.log($"Bowel={_bowel.Id}");
+            helper.log($"Rectum={_rectum.Id}");
+            helper.log($"PTV={_ptv.Id}");
+
+            _patient.BeginModifications();
+
+            helper.log("creating rectum/bowel optimization contours...");
+            var result = bladder_art.make_opti_contours(
+                _structureSet,
+                _ptv,
+                _rectum,
+                _bowel,
+                _optiRectumId,
+                _optiBowelId);
+            helper.log($"opti contours created ({_optiRectumId},{_optiBowelId})");
+
+            helper.log("savign modificatinos...");
+            global.vmsApplication.SaveModifications();
+
+            // notify the structure set change
+            OnPropertyChanged(nameof(StructureSet));
+
+            helper.log("Done.");
+
+            return true;
+        }
+
+        private async void CreatePlanAndIOptimize()
+        {
+
+            helper.log("CreatePlanAndIOptimize()");
+
+            if (_patient == null)
+            {
+                helper.show_error_msg_box("Please select a patient!");
                 return;
             }
 
-            pt.BeginModifications();
+            if (_image == null)
+            {
+                helper.show_error_msg_box("Please select an image!");
+                return;
+            }
+
+            if (_structureSet == null)
+            {
+                helper.show_error_msg_box("Error - the selected image has no structureset!");
+                return;
+            }
+
+            // check bowel exists
+            if (_bowel == null)
+            {
+                helper.show_error_msg_box($"Bowel not set!");
+                return;
+            }
+
+            // check rectum exists
+            if (_rectum == null)
+            {
+                helper.show_error_msg_box($"Rectum not set!");
+                return;
+            }
+
+            // check bladder exists
+            if (_bladder == null)
+            {
+                helper.show_error_msg_box($"Bladder not set!");
+                return;
+            }
+
+            // check bladder exists
+            if (_ptv == null)
+            {
+                helper.show_error_msg_box($"PTV not set!");
+                return;
+            }
+
+
+            // print
+            helper.log($"Patient={_patient.Id}");
+            helper.log($"Image={_image.Id}");
+            helper.log($"StructureSet={_structureSet.Id}");
+            helper.log($"Bowel={_bowel.Id}");
+            helper.log($"Bladder={_bladder.Id}");
+            helper.log($"Rectum={_rectum.Id}");
+            helper.log($"PTV={_ptv.Id}");
+
+            // plan already exists?
+            if (esapi.esapi.ps_of_id(_newPlanId, _patient) != null)
+            {
+                // override?
+                if (!helper.show_yes_no_msg_box($"Plan already exitsts (Id={_newPlanId}). Do you want to override?"))
+                    return;
+            }
+
+
+            helper.show_info_msg_box("It will take about a couple of minutes. Please be patient...");
+
+            // create opti contours
+            if (!CreateOptiContours())
+                return;
+
+            int task_delay_milliseconds = 1000;
 
             try
             {
-                helper.log("OptimizeButton_Click() - begin");
+                // 1. Set the cursor to Wait at the very beginning
+                Mouse.OverrideCursor = Cursors.Wait;
 
-                string today = DateTime.Now.ToString("MMdd");
-                int n = 0;
-                string ps_id = $"art_{today}_{n}";
-                while (ps_of_id(ps_id, pt) != null)
-                {
-                    n++;
-                    ps_id = $"art_{today}_{n}";
-                }
-                helper.log($"plan_id={ps_id}");
+                _patient.BeginModifications();
 
-                bladder_art.create_bladder_plan3(
-                    pt,
-                    sset,
-                    course,
-                    ps_id,
-                    _pTVId,
-                    bladder_id,
-                    rectum_id,
+                helper.log("Beginning create plan and optimization");
+
+                helper.log($"plan id={_newPlanId}");
+                helper.log($"number of fractions={_newPlanNumOfFractions}");
+                helper.log($"dose per fraction={_newPlanDosePerFraction}");
+
+                // update UI
+                await Task.Delay(task_delay_milliseconds);
+
+                string default_imaging_device_id = "CTAWP96967";
+                string optimization_model = "PO_13623";
+                string volume_dose_calculation_model = "AAA_13623";
+                
+
+                Plan = (VMSPlanSetup) await bladder_art.create_bladder_plan4(
+                    _patient,
+                    _structureSet,
+                    _course,
+                    _newPlanId,
+                    _ptv.Id,
+                    _bladder.Id,
+                    _rectum.Id,
                     _optiRectumId,
-                    bowel_id,
+                    _bowel.Id,
                     _optiBowelId,
-                    num_fxs,
-                    dose_per_fx
+                    _newPlanNumOfFractions,
+                    _newPlanDosePerFraction,
+                    default_imaging_device_id,
+                    optimization_model,
+                    volume_dose_calculation_model,
+                    task_delay_milliseconds
                 );
 
-                Plan = esapi.esapi.ps_of_id(ps_id, pt);
+                if (Plan != null)
+                { // saving changes...
+                    helper.log("Saving changes");
+                    global.vmsApplication.SaveModifications();
+                }
 
-                helper.log("optimization - done");
+                helper.log("Done.");
             }
             catch (Exception ex)
             {
                 helper.error($"Error: {ex.Message}");
             }
+            finally
+            {
+                // 3. ALWAYS reset the cursor back to default in the finally block
+                Mouse.OverrideCursor = null;
+            }
 
 
-            global.vmsApplication.SaveModifications();
+
         }
 
     }

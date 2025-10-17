@@ -184,8 +184,9 @@ namespace nnunet_client.viewmodels
 
         private void AddItem()
         {
-            DoseLimit doselimit = new DoseLimit { Id = "New" };
+            DoseLimit doselimit = new DoseLimit { Id = "New", Plan=Plan };
 
+            // add the first prescirption
             if (_prescriptions?.Count()>0)
                 doselimit.Prescription = _prescriptions[0];
 

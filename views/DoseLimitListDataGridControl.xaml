@@ -12,9 +12,6 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/StandardStyles.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
 
             <Style x:Key="RowTextBlockStyle" TargetType="{x:Type TextBlock}">
                 <Setter Property="VerticalAlignment" Value="Center"/>
@@ -48,8 +45,6 @@
                     <DataTrigger Binding="{Binding Result}" Value="Acceptable">
                         <Setter Property="Foreground" Value="Blue" />
                     </DataTrigger>
-
-
                 </Style.Triggers>
             </Style>
 
@@ -92,12 +87,18 @@
 
         <!-- Table -->
         <DataGrid Grid.Row="0"
+                  x:Name="RootDataGrid"
                   ItemsSource="{Binding DoseLimits}"
                   SelectedItem="{Binding SelectedDoseLimit}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False">
             <DataGrid.Columns>
 
+                <DataGridTextColumn Header="Priority"
+                     Binding="{Binding Priority, Mode=TwoWay}"
+                     ElementStyle="{StaticResource RowTextBlockStyle}"   
+                     EditingElementStyle="{StaticResource RowTextBoxStyle}"   
+                     Width="40"/>
 
                 <DataGridTextColumn Header="ID"
                     Binding="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -166,9 +167,10 @@
                     EditingElementStyle="{StaticResource LimitTextBoxStyle}"   
                     Width="*"/>
 
-                <DataGridTextColumn Header="Value"
+                <DataGridTextColumn 
+                    Header="Value"
                     Binding="{Binding Value.Display, Mode=OneWay}"
-                                                        ElementStyle="{StaticResource RowTextBlockStyle}"   
+                    ElementStyle="{StaticResource ResultTextBlockStyle}"   
                     Width="*"/>
 
                 <DataGridTextColumn 
