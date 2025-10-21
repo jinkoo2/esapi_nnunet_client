@@ -65,6 +65,6 @@
                     IsEnabled="{Binding ProcessIdle}"
                     MinWidth="100" Margin="10,5" Padding="5">Import Contours</Button>
         </StackPanel>
-        <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" Grid.Row="4"/>
+        <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" Grid.Row="4" Background="Transparent"/>
     </Grid>
 </UserControl>

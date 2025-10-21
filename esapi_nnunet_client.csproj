@@ -287,6 +287,9 @@
     <Compile Include="views\GenericListControl.xaml.cs">
       <DependentUpon>GenericListControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="views\InputDialog.xaml.cs">
+      <DependentUpon>InputDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="views\LogFileViewControl.xaml.cs">
       <DependentUpon>LogFileViewControl.xaml</DependentUpon>
     </Compile>
@@ -347,6 +350,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="views\GenericListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\InputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -13,11 +13,17 @@
             <Setter Property="Width" Value="50"/>
             <Setter Property="Height" Value="25"/>
             <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="3,0" />
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
 
-        <!-- Style applied to all heading labels in the grid -->
+        <Style x:Key="ColumnHeadLabelStyle" TargetType="{x:Type Label}">
+            <Setter Property="Foreground" Value="#2c3e50"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
         <Style x:Key="InputLabelStyle" TargetType="{x:Type Label}">
             <Setter Property="Foreground" Value="#2c3e50"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
@@ -178,14 +184,85 @@
                     <TabControl Margin="10" BorderBrush="#ccc" BorderThickness="1">
                         <TabItem Header="Create" Padding="10,5">
 
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="New Plan ID:" HorizontalContentAlignment="Right" Background="White" />
-                                <TextBox Text="{Binding NewPlanId}" />
-                                <Button 
-                                Command="{Binding CreatePlanAndOptimizeCommand}"
-                                Content="Create Plan and Optimize" />
+                            <Grid Margin="10" Background="#f7f7f7" HorizontalAlignment="Left">
 
-                            </StackPanel>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- New Plan Id-->
+                                <Label Grid.Row="0" Grid.Column="0"  Content="New Plan ID" Style="{StaticResource ColumnHeadLabelStyle}"/>
+                                <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding NewPlanId}"/>
+
+                                <!-- Nubmer of Beams -->
+                                <Label Grid.Row="0" Grid.Column="1" Content="Number Of Beams" Style="{StaticResource InputLabelStyle}"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" 
+                                       Text="{Binding NumberOfBeams}" 
+                                       Style="{StaticResource NumberTextBoxStyle}"/>
+
+                                <!-- Dose/Fx -->
+                                <Label Grid.Row="0" Grid.Column="2" Content="Dose/Fx" Style="{StaticResource ColumnHeadLabelStyle}"/>
+                                <TextBox Grid.Row="1" Grid.Column="2" 
+                                       Text="{Binding DosePerFraction}" 
+                                       Style="{StaticResource NumberTextBoxStyle}"/>
+
+                                <!-- Number of Fractions -->
+                                <Label Grid.Row="0" Grid.Column="3" Content="# Fractions" Style="{StaticResource ColumnHeadLabelStyle}"/>
+                                <TextBox Grid.Row="1" Grid.Column="3" 
+                                       Text="{Binding NumberOfFractions}" 
+                                       Style="{StaticResource NumberTextBoxStyle}"/>
+
+                                <!-- Total Dose -->
+                                <Label Grid.Row="0" Grid.Column="4" Content="Total Dose" Style="{StaticResource ColumnHeadLabelStyle}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="4" 
+                                       Text="{Binding TotalDose, Mode=OneWay}" 
+                                         />
+
+                                <!-- Jaw Tracking -->
+                                <Label Grid.Row="0" Grid.Column="5" Content="Jaw Tracking" Style="{StaticResource ColumnHeadLabelStyle}"/>
+                                <CheckBox Grid.Row="1" Grid.Column="5" IsChecked="{Binding UseJawTracking}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                                <!-- Intermediate Dose Calculatin  -->
+                                <Label Grid.Row="0" Grid.Column="6" Content="Intermediate Dose Calculation" Style="{StaticResource ColumnHeadLabelStyle}"/>
+                                <CheckBox Grid.Row="1" Grid.Column="6" IsChecked="{Binding UseIntermediateDoseCalculation}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                                <!-- Primary Reference Point -->
+                                <Label Grid.Row="0" Grid.Column="7" Content="Primary Ref Point" Style="{StaticResource ColumnHeadLabelStyle}"/>
+                                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="7">
+                                    <ComboBox 
+                                          ItemsSource="{Binding ReferencePoints}"
+                                          DisplayMemberPath="Id"
+                                          SelectedItem="{Binding PrimaryReferencePoint}"
+                                          Margin="0,5"
+                                          />
+                                    <Button 
+                                        ToolTip="Add a new reference point"
+                                        Command="{Binding AddNewPrimaryReferencePointCommand}"
+                                        Padding="5" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Left">+</Button>
+                                </StackPanel>
+
+                                <!-- Create and Optimize -->
+                                <Button Grid.Row="1" Grid.Column="8"
+                                        ToolTip="Create a plan and optimize"
+                                      Command="{Binding CreatePlanAndOptimizeCommand}"
+                                      Content="Create and Optimize" 
+                                      Width="150"
+         />
+
+                            </Grid>
 
                         </TabItem>
                     </TabControl>

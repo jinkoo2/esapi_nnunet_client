@@ -28,6 +28,7 @@ using VMSSeries = VMS.TPS.Common.Model.API.Series;
 using VMSStructure = VMS.TPS.Common.Model.API.Structure;
 using VMSStructureSet = VMS.TPS.Common.Model.API.StructureSet;
 using VMSStudy = VMS.TPS.Common.Model.API.Study;
+using System.Threading;
 
 namespace nnunet_client.viewmodels
 {
@@ -36,15 +37,73 @@ namespace nnunet_client.viewmodels
         public ICommand MakePTVCommand { get; }
         public ICommand CreatePlanAndOptimizeCommand { get; }
 
+        public ICommand AddNewPrimaryReferencePointCommand { get; }
+
 
         // construction
         public BladderAutoPlanViewModel()
         {
             MakePTVCommand = new RelayCommand(CreatePTV);
             CreatePlanAndOptimizeCommand = new RelayCommand(CreatePlanAndIOptimize);
+            AddNewPrimaryReferencePointCommand = new RelayCommand(AddNewPrimaryReferencePoint);
         }
 
-        
+        private void AddNewPrimaryReferencePoint()
+        {
+            if(_patient == null)
+            {
+                helper.show_error_msg_box("Please select a patient first");
+                return;
+            }
+
+            helper.log("Adding a new primary reference point");
+
+            // 1. Create the dialog, passing the required prompt text
+            var inputDialog = new views.InputDialog("Enter Reference Point ID:");
+
+            // 2. Show the dialog modally and check the result
+            bool? result = inputDialog.ShowDialog();
+
+            if (result == true)
+            {
+                // User clicked OK or pressed Enter
+                string userInput = inputDialog.InputText?.Trim();
+                System.Console.WriteLine($"User entered: {userInput}");
+
+                if (userInput.Trim() == "")
+                {
+                    helper.log("User input is blank.");
+                    return;
+                }
+
+                _patient.BeginModifications();
+                {
+
+                    // add to the ref list of the patient
+                    helper.log($"Adding a reference point [{userInput}] to patient...");
+                    _patient.AddReferencePoint(true, userInput);
+                }
+
+                helper.log($"Saving...");
+                global.vmsApplication.SaveModifications();
+
+
+                // notify the list changed
+                OnPropertyChanged(nameof(ReferencePoints));
+
+                // set as the primary reference selection.
+                PrimaryReferencePoint = _patient.ReferencePoints.FirstOrDefault(rp=>rp.Id == userInput);
+            }
+            else
+            {
+                // User clicked Cancel or closed the window
+                System.Console.WriteLine("Input cancelled by user.");
+            }
+
+
+        }
+
+
         private VMSPatient _patient = null;
         public VMSPatient Patient
         {
@@ -55,6 +114,13 @@ namespace nnunet_client.viewmodels
                     return;
 
                 SetProperty<VMSPatient>(ref _patient, value);
+
+                // update reference point list
+                OnPropertyChanged(nameof(ReferencePoints));
+
+                //helper.log("Patient Reference Points");
+                //foreach(VMSReferencePoint point in ReferencePoints)
+                //    helper.log($"\t{point.Id}");
             }
         }
 
@@ -63,6 +129,23 @@ namespace nnunet_client.viewmodels
         {
             get => _course;
             set => SetProperty<VMSCourse>(ref _course, value);
+        }
+
+        public ObservableCollection<VMSReferencePoint> ReferencePoints
+        {
+            get
+            {
+                return (_patient != null) ? new ObservableCollection<VMSReferencePoint>(_patient.ReferencePoints) : new ObservableCollection<VMSReferencePoint>();
+            }
+            
+        }
+
+
+        private VMSReferencePoint _primaryReferencePoint;
+        public VMSReferencePoint PrimaryReferencePoint
+        {
+            get => _primaryReferencePoint;
+            set => SetProperty(ref _primaryReferencePoint, value);
         }
 
         string bladder_id = "Bladder";
@@ -211,23 +294,7 @@ namespace nnunet_client.viewmodels
             set => SetProperty<string>(ref _newPlanId, value);
         }
 
-        int _newPlanNumOfFractions = 20;
-        public int NewPlanNumOfFractions
-        {
-            get => _newPlanNumOfFractions;
-            set => SetProperty<int>(ref _newPlanNumOfFractions, value);
-        }
         
-        double _newPlanDosePerFraction = 275;
-        public double NewPlanDosePerFraction
-        {
-            get => _newPlanDosePerFraction;
-            set => SetProperty<double>(ref _newPlanDosePerFraction, value);
-        }
-        public double NewPlanTotalDose
-        {
-            get => (_newPlanDosePerFraction * _newPlanDosePerFraction);
-        }
 
         private void CreatePTV()
         {
@@ -402,6 +469,67 @@ namespace nnunet_client.viewmodels
             return true;
         }
 
+        private int _numberOfBeams = 7;
+        public int NumberOfBeams
+        {
+            get => _numberOfBeams; 
+            set {
+                if (_numberOfBeams == value) return;
+                SetProperty(ref _numberOfBeams, value);
+            }
+        }
+
+        private double _dosePerFraction = 275;
+        public double DosePerFraction
+        { 
+            get => _dosePerFraction;
+            set
+            {
+                if(_dosePerFraction == value) return;
+
+                SetProperty(ref _dosePerFraction, value);
+
+                OnPropertyChanged(nameof(TotalDose));
+            }
+        }
+
+        private int _numberOfFractions = 20;
+        public int NumberOfFractions
+        {
+            get => _numberOfFractions;
+            set
+            {
+                if (_numberOfFractions == value) return;
+
+                SetProperty(ref _numberOfFractions, value);
+
+                OnPropertyChanged(nameof(TotalDose));
+            }
+        }
+
+
+        public double TotalDose
+        {
+            get
+            {
+                return _numberOfFractions * _dosePerFraction;
+            }
+        }
+
+        private bool _useJawTracking = false;
+        public bool UseJawTracking
+        {
+            get => _useJawTracking;
+            set => SetProperty(ref _useJawTracking, value);
+        }
+
+        private bool _useIntermediateDoseCalculation = true;
+        public bool UseIntermediateDoseCalculation
+        {
+            get =>_useIntermediateDoseCalculation;
+            set => SetProperty(ref _useIntermediateDoseCalculation, value);
+        }
+
         private async void CreatePlanAndIOptimize()
         {
 
@@ -446,13 +574,19 @@ namespace nnunet_client.viewmodels
                 return;
             }
 
-            // check bladder exists
+            // ptv 
             if (_ptv == null)
             {
                 helper.show_error_msg_box($"PTV not set!");
                 return;
             }
 
+            // primary reference point
+            if (_primaryReferencePoint == null)
+            {
+                helper.show_error_msg_box($"Primary Reference Point is not set!");
+                return;
+            }
 
             // print
             helper.log($"Patient={_patient.Id}");
@@ -487,11 +621,18 @@ namespace nnunet_client.viewmodels
 
                 _patient.BeginModifications();
 
+                // if plan exists, remove it first.
+                if(esapi.esapi.ps_of_id(_newPlanId,_patient) != null)
+                {
+                    helper.log($"Removing existing plan of Id={_newPlanId}");
+                    esapi.esapi.remove_ps(_newPlanId, _patient);
+                }
+
                 helper.log("Beginning create plan and optimization");
 
                 helper.log($"plan id={_newPlanId}");
-                helper.log($"number of fractions={_newPlanNumOfFractions}");
-                helper.log($"dose per fraction={_newPlanDosePerFraction}");
+                helper.log($"number of fractions={_numberOfFractions}");
+                helper.log($"dose per fraction={_dosePerFraction}");
 
                 // update UI
                 await Task.Delay(task_delay_milliseconds);
@@ -499,12 +640,12 @@ namespace nnunet_client.viewmodels
                 string default_imaging_device_id = "CTAWP96967";
                 string optimization_model = "PO_13623";
                 string volume_dose_calculation_model = "AAA_13623";
-                
 
                 Plan = (VMSPlanSetup) await bladder_art.create_bladder_plan4(
                     _patient,
                     _structureSet,
                     _course,
+                    _primaryReferencePoint,
                     _newPlanId,
                     _ptv.Id,
                     _bladder.Id,
@@ -512,16 +653,25 @@ namespace nnunet_client.viewmodels
                     _optiRectumId,
                     _bowel.Id,
                     _optiBowelId,
-                    _newPlanNumOfFractions,
-                    _newPlanDosePerFraction,
+                    _numberOfBeams,
+                    _numberOfFractions,
+                    _dosePerFraction,
                     default_imaging_device_id,
                     optimization_model,
                     volume_dose_calculation_model,
+                    _useIntermediateDoseCalculation,
+                    _useJawTracking,
                     task_delay_milliseconds
                 );
 
                 if (Plan != null)
-                { // saving changes...
+                {
+                    // set dose limits
+                    Plan.PrimaryReferencePoint.DailyDoseLimit = new VMS.TPS.Common.Model.Types.DoseValue(DosePerFraction, "cGy");
+                    Plan.PrimaryReferencePoint.SessionDoseLimit = new VMS.TPS.Common.Model.Types.DoseValue(DosePerFraction, "cGy");
+                    Plan.PrimaryReferencePoint.TotalDoseLimit = new VMS.TPS.Common.Model.Types.DoseValue(TotalDose, "cGy");
+
+                    // saving changes...
                     helper.log("Saving changes");
                     global.vmsApplication.SaveModifications();
                 }

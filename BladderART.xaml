@@ -89,12 +89,23 @@
             
         </Grid.RowDefinitions>
 
+            
+        <Border 
+            HorizontalAlignment="Stretch"
+            Background="#EEEEEE"
+            BorderThickness="0"
+            CornerRadius="3"
+            Margin="0,0,0,5"
+            >
         <TextBlock Text="Bladder ART"
                     Grid.Row="0"
-                   FontSize="24"
+                   FontSize="18"
                    HorizontalAlignment="Center"
-                   Margin="0 10"
+                   Margin="0 5"
+                   Background="Transparent"
+                   FontWeight="SemiBold"
                    />
+        </Border>
 
         <TabControl Grid.Row="1">
             <TabItem Header="Patient/Image" Padding="5">

@@ -33,6 +33,7 @@ using VMSSeries = VMS.TPS.Common.Model.API.Series;
 using VMSRegistration = VMS.TPS.Common.Model.API.Registration;
 using VMSReferencePoint = VMS.TPS.Common.Model.API.ReferencePoint;
 using VMSHospital = VMS.TPS.Common.Model.API.Hospital;
+using System.Windows.Forms;
 
 namespace nnunet_client
 {
@@ -1332,7 +1333,7 @@ namespace nnunet_client
 
             for (int b_index = 0; b_index < Gs.Length; b_index++)
             {
-                VRect<double> jawPositions = new VRect<double>(5, 5, 5, 5);
+                VRect<double> jawPositions = new VRect<double>(-50, 50, -50, 50);
                 double collimatorAngle = 30.0;
                 double gantryAngle = Gs[b_index];
                 double patientSupportAngle = 0.0;
@@ -1487,10 +1488,13 @@ namespace nnunet_client
             //}
         }
 
+        
+
         public static async Task<ExternalPlanSetup> create_bladder_plan4(
             VMSPatient pt,
             VMSStructureSet sset,
             VMSCourse course,
+            VMSReferencePoint primary_reference_point,
             string ps_id,
             string ptv_id,
             string bladder_id,
@@ -1498,11 +1502,14 @@ namespace nnunet_client
             string opti_rectum_id,
             string bowel_id,
             string opti_bowel_id,
+            int num_beams,
             int num_fxs,
             double dose_per_fx,
             string default_imaging_device_id,
             string optimization_model,
             string volume_dose_calculation_model,
+            bool use_intermediate_dose_calculation,
+            bool use_jaw_tracking,
             int task_delay_milliseconds
             )
         {
@@ -1541,7 +1548,7 @@ namespace nnunet_client
 
             double total_dose = num_fxs * dose_per_fx;
 
-            ExternalBeamMachineParameters machine = new ExternalBeamMachineParameters("SIL 21IX", "6X", 600, "STATIC", "");
+            
 
 
             // set default imaging device
@@ -1622,41 +1629,50 @@ namespace nnunet_client
 
 
             // beams (gantry angles)
-            int num_beams = 9;
-            int gantr_interval = 40;
-            int gantry_start = 0;
+            int gantr_interval = (int)(360.0/num_beams);
+            int gantry_start = 180 + (int)(gantr_interval/2);
             double[] Gs = new double[num_beams];
             for (int g = 0; g < num_beams; g++)
             {
-                double gantry_angle = gantry_start + gantr_interval * g;
-                if (gantry_angle >= 360)
-                    gantry_angle -= 360;
-
+                double gantry_angle = gantry_start - gantr_interval * g;
+                if (gantry_angle < 0)
+                    gantry_angle += 360;
                 Gs[g] = gantry_angle;
             }
             _info($"Gantry angels={string.Join(", ", Gs)}");
 
-            ExternalPlanSetup ps = find_or_add_ext_ps(ps_id, sset, course);
+            helper.log($"Adding ExternalPlanSetup[Id={ps_id}]");
+            ExternalPlanSetup ps = course.AddExternalPlanSetup(sset, s_ptv, primary_reference_point );
             if (ps == null)
             {
                 _err($"Plan (Id={ps_id}) - failed to create nor find plan.");
             }
-            _info($"ps={ps.Id}");
+            ps.Id = ps_id;
 
+            _info($"ps={ps.Id}");
             //new_ps.SetPrescription(ps.NumberOfFractions??0, ps.DosePerFraction, ps.TreatmentPercentage);
             ps.SetPrescription(num_fxs, new DoseValue(dose_per_fx, DoseValue.DoseUnit.cGy), 1.0);
+
+            ExternalBeamMachineParameters machine = new ExternalBeamMachineParameters("SIL 21IX", "6X", 600, "STATIC", "");
+            VVector isocenter = s_ptv.CenterPoint;
 
             _info("Adding Beams...");
             for (int b_index = 0; b_index < Gs.Length; b_index++)
             {
-                VRect<double> jawPositions = new VRect<double>(5, 5, 5, 5);
+                VRect<double> jawPositions = new VRect<double>(-50, -50, 50, 50);
                 double collimatorAngle = 30.0;
                 double gantryAngle = Gs[b_index];
                 double patientSupportAngle = 0.0;
-                VVector isocenter = s_ptv.CenterPoint;
 
-                string b_Id = $"{b_index+1}";
+                string b_Id = $"{b_index}";
                 //Beam new_b = new_ps.AddMLCBeam(machine, cpt0.LeafPositions, cpt0.JawPositions, cpt0.CollimatorAngle, cpt0.GantryAngle, cpt0.PatientSupportAngle, b.IsocenterPosition);
+                Console.WriteLine($"b_Id={b_Id}");
+                Console.WriteLine($"machine={machine}");
+                Console.WriteLine($"jawPositions={jawPositions}");
+                Console.WriteLine($"collimatorAngle={collimatorAngle}");
+                Console.WriteLine($"gantryAngle={gantryAngle}");
+                Console.WriteLine($"patientSupportAngle={patientSupportAngle}");
+                Console.WriteLine($"isocenter=[{isocenter[0]},{isocenter[1]},{isocenter[2]}");
                 Beam new_b = ps.AddStaticBeam(
                     machine,
                     jawPositions,
@@ -1669,8 +1685,10 @@ namespace nnunet_client
 
                 //BeamParameters bp = new_b.GetEditableParameters();
 
+
                 // fit Jaw to the new ptv
-                double jaw_margin_mm = 20.0; // large enough for IMRT
+                double jaw_margin_mm = 10.0; // large enough for IMRT
+                helper.log($"Fitting Jaw to the target with margin {jaw_margin_mm} mm");
                 new_b.FitCollimatorToStructure(new FitToStructureMargins(jaw_margin_mm), s_ptv, true, true, false);
 
                 // fit MLC to the new ptv
@@ -1685,6 +1703,20 @@ namespace nnunet_client
                 //m++;
             }
 
+            // add setup beams
+            helper.log("Adding setup beams...");
+            add_setup_beam(ps, "CBCT", 0.0, isocenter, machine);
+            add_setup_beam(ps, "AP", 0.0, isocenter, machine);
+            add_setup_beam(ps, "PA", 180.0, isocenter, machine);
+            add_setup_beam(ps, "LT", 90.0, isocenter, machine);
+            add_setup_beam(ps, "RT", 270.0, isocenter, machine);
+
+            // add drr
+            helper.log("Adding DRRs...");
+            foreach (Beam b in ps.Beams)
+                add_bony_drr(b);
+
+
             // public void SetCalculationModel(
             _info("Setting calculation models...");
             ps.SetCalculationModel(CalculationType.PhotonOptimization, optimization_model);
@@ -1692,6 +1724,10 @@ namespace nnunet_client
 
             // optimization
             OptimizationSetup os = ps.OptimizationSetup;
+            
+
+            os.UseJawTracking = use_jaw_tracking;
+            
             //OptimizationNormalTissueParameter nto = os.AddAutomaticNormalTissueObjective(0.1);
 
             // dose values
@@ -1720,13 +1756,29 @@ namespace nnunet_client
 
             os.AddAutomaticNormalTissueObjective(100.0);
 
-            OptimizationOptionsIMRT optm_Options = new OptimizationOptionsIMRT(
-                300,//int maxIterations,
-                OptimizationOption.RestartOptimization,
-                OptimizationConvergenceOption.TerminateIfConverged,
-                OptimizationIntermediateDoseOption.UseIntermediateDose,
-                "" //string mlcId
-            );
+            OptimizationOptionsIMRT optm_Options = null;
+            if (use_intermediate_dose_calculation)
+            {
+                optm_Options = new OptimizationOptionsIMRT(
+                    300,//int maxIterations,
+                    OptimizationOption.RestartOptimization,
+                    OptimizationConvergenceOption.TerminateIfConverged,
+                    OptimizationIntermediateDoseOption.UseIntermediateDose,
+                    "" //string mlcId
+                        );
+            }
+            else
+            {
+                optm_Options = new OptimizationOptionsIMRT(
+                    300,//int maxIterations,
+                    OptimizationOption.RestartOptimization,
+                    OptimizationConvergenceOption.TerminateIfConverged,
+                    OptimizationIntermediateDoseOption.NoIntermediateDose,
+                    "" //string mlcId
+                        );
+            }
+
+
 
 
             _info("optimizing...");

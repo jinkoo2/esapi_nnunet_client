@@ -40,6 +40,11 @@ namespace nnunet_client
         public static void error(string message)
         {
             Console.WriteLine(message);
+            
+            if (Logger != null)
+            {
+                Logger.AppendLine(message);
+            }
         }
 
         public static void show_error_msg_box(string message)

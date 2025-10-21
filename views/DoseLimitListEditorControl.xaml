@@ -40,7 +40,7 @@
 
         <!-- Title Header with Menu-->
         <Border Grid.Row="0"
-                Background="#CCCCCC"
+                Background="#EEEEEE"
                 CornerRadius="5"
                 Margin="5,5,5,10">
 
@@ -67,8 +67,8 @@
 
                 <TextBox 
                          Grid.Column="1" 
-                         FontWeight="Bold"
-                         FontSize="20"
+                         FontWeight="SemiBold"
+                         FontSize="18"
                          HorizontalAlignment="Stretch"
                          HorizontalContentAlignment="Center"
                          Background="Transparent"

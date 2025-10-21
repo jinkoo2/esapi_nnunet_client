@@ -46,9 +46,9 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="Name:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" FontWeight="Bold"/>
+            <TextBlock Text="Name:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" Background="Transparent"/>
             <TextBox Text="{Binding Template.Name}" Grid.Row="0" Grid.Column="1" Width="300" Margin="5 2" HorizontalAlignment="Left"/>
-            <TextBlock Text="Description:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" FontWeight="Bold"/>
+            <TextBlock Text="Description:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Right" Background="Transparent"/>
             <TextBox Text="{Binding Template.Description}"
              Grid.Row="1" Grid.Column="1"
                      HorizontalAlignment="Left"
