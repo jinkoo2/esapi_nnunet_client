@@ -25,9 +25,9 @@ using VMSStudy = VMS.TPS.Common.Model.API.Study;
 using System.Windows.Documents.DocumentStructures;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
-[assembly: AssemblyVersion("1.0.0.1")]
-[assembly: AssemblyFileVersion("1.0.0.1")]
-[assembly: AssemblyInformationalVersion("1.0")]
+[assembly: AssemblyVersion("1.0.0.2")]
+[assembly: AssemblyFileVersion("1.0.0.2")]
+[assembly: AssemblyInformationalVersion("1.0.0.2")]
 [assembly: ESAPIScript(IsWriteable = true)]
 
 // TODO: Uncomment the following line if the script requires write access.
@@ -64,8 +64,7 @@ namespace nnunet_client
 
             try
             {
-
-
+                global.load_config();
 
                 //VMSPatient pt = vmsApp.OpenPatientById("30013645");
                 //VMSImage img = esapi.esapi.image_of_id("CBCT_9", pt);
@@ -98,6 +97,8 @@ namespace nnunet_client
                 //var window = new nnunet_client.DoseLimitEditorWindow();
                 //var window = new nnunet_client.DoseLimitChecker(vmsApp);
                 var window = new BladderART(vmsApp);
+                //var window = new AutoContourWindow();
+
 
                 wpfApp.Run(window);
 

@@ -190,5 +190,14 @@ private void HandleAutoPlanPropertyChanged(object sender, PropertyChangedEventAr
 
             Logger.StopLogPolling();
         }
+
+        private void SavePatient_Click(object sender, RoutedEventArgs e)
+        {
+            if (global.vmsPatient != null)
+            {
+                helper.log("Saving...");
+                global.vmsApplication.SaveModifications();
+            }
+        }
     }
 }

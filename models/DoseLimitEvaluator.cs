@@ -145,17 +145,17 @@ namespace nnunet_client.models
         /// <exception cref="Exception">Thrown if an invalid operator is provided.</exception>
         public static Result Test(double value, string op, double? th1, double? th2)
         {
-            Console.WriteLine("Test()");
-            Console.WriteLine($"op={op}");
-            Console.WriteLine($"value={value}");
-            Console.WriteLine($"th1={th1}");
-            Console.WriteLine($"th2={th2}");
+            //Console.WriteLine("Test()");
+            //Console.WriteLine($"op={op}");
+            //Console.WriteLine($"value={value}");
+            //Console.WriteLine($"th1={th1}");
+            //Console.WriteLine($"th2={th2}");
 
             if (th2 == null)
             {
                 if (op == ">")
                 {
-                    Console.WriteLine($"op=>, value > th1 ==> {value > th1}");
+                    //Console.WriteLine($"op=>, value > th1 ==> {value > th1}");
                     return value >= th1 ? Result.Pass : Result.Fail;
                 }
                 if (op == "<") return value <= th1 ? Result.Pass : Result.Fail;
@@ -168,17 +168,17 @@ namespace nnunet_client.models
                 {
                     if (value >= th2)
                     {
-                        Console.WriteLine("value > th2 --> Pass");
+                        //Console.WriteLine("value > th2 --> Pass");
                         return Result.Pass;
                     }
 
                     if (value >= th1)
                     {
-                        Console.WriteLine("value > th1 --> Acceptable");
+                        //Console.WriteLine("value > th1 --> Acceptable");
                         return Result.Acceptable;
                     }
 
-                    Console.WriteLine("else, returning Fail");
+                    //Console.WriteLine("else, returning Fail");
                     return Result.Fail;
                 }
                 if (op == "<")

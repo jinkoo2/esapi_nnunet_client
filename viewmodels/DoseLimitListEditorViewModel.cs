@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using itk.simple;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using nnunet_client.models;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +24,9 @@ namespace nnunet_client.viewmodels
         public ICommand LoadCommand { get; }
         [JsonIgnore]  // not include in JSON
         public ICommand SaveCommand { get; }
+
+        [JsonIgnore]  // not include in JSON
+        public ICommand EvaluateCommand { get; }
 
         private Visibility _saveButtonVisibility = Visibility.Visible;
         [JsonIgnore]
@@ -63,14 +68,70 @@ namespace nnunet_client.viewmodels
             }
             set
             {
-                if (value == _plan) return;
+                if (value == _plan)
+                {
+                    Console.WriteLine($"DoseLimitListEditorViewModel - given plan is the same as the current plan. so, returning...");
+                    return;
+                }
 
-                Console.WriteLine($"DoseLimitListEditorViewModel - Setting a new plan...{_plan?.Id}");
-                SetProperty<VMS.TPS.Common.Model.API.PlanningItem>(ref _plan, value);
+                Console.WriteLine($"DoseLimitListEditorViewModel - Setting a new plan...{value?.Id}");
+                SetProperty(ref _plan, value, nameof(Plan));
+
+                OnPropertyChanged(nameof(PlanNormalizationValue));
 
                 DoseLimitListViewModel.Plan = _plan;
             }
         }
+
+        public double PlanNormalizationValue
+        {
+            get
+            {
+                if (_plan != null)
+                {
+                    double value = ((VMS.TPS.Common.Model.API.PlanSetup)_plan).PlanNormalizationValue;
+                    
+                    Console.WriteLine($"PlanNormalizationValue={value}");
+
+                    return value;
+                }
+                else 
+                {
+                    Console.WriteLine("_plan is null. returning Nan.");
+                    return double.NaN;
+                }
+            }
+
+            set
+            {
+                Console.WriteLine($"PlanNormalizationValue.set({value})");
+
+                if (PlanNormalizationValue == value) return;
+
+                if (_plan != null && value != double.NaN)
+                {
+                    global.vmsPatient.BeginModifications();
+
+                    Console.WriteLine($"Plan is not null, value is not NaN. Setting PlanNormalizationValue to {value}");
+                    ((VMS.TPS.Common.Model.API.PlanSetup)_plan).PlanNormalizationValue = value;
+                }
+                else if(_plan == null) 
+                {
+                    Console.WriteLine("Plan is null.");
+                    DoseLimitListViewModel.Plan = null;
+                }
+                else
+                {
+                    Console.WriteLine("value is NaN.");
+                    DoseLimitListViewModel.Plan = null;
+                }
+
+                DoseLimitListViewModel.Evaluate();
+
+                OnPropertyChanged(nameof(Plan));
+            }
+        }
+
 
         private PrescriptionListViewModel _prescriptionListViewModel;
         [JsonIgnore]
@@ -109,6 +170,9 @@ namespace nnunet_client.viewmodels
             // commands
             LoadCommand = new RelayCommand(Load);
             SaveCommand = new RelayCommand(Save);
+
+            EvaluateCommand = new RelayCommand(Evaluate);
+
         }
 
         public DoseLimitListEditorViewModel Duplicate()
@@ -152,6 +216,11 @@ namespace nnunet_client.viewmodels
             string json = File.ReadAllText(templateFilePath);
             DoseLimitListEditorViewModel data = JsonConvert.DeserializeObject<DoseLimitListEditorViewModel>(json);
 
+            // sort by priority
+            data.DoseLimitListViewModel.DoseLimits = new ObservableCollection<DoseLimit>(data.DoseLimitListViewModel.DoseLimits.OrderBy(item => item.Priority));
+            data.Plan = this.Plan;
+            data.DoseLimitListViewModel.Evaluate();
+
             if (data != null)
             {
                 this.Title = data.Title;
@@ -186,7 +255,12 @@ namespace nnunet_client.viewmodels
             }
         }
 
-        
+        public void Evaluate()
+        {
+            this.DoseLimitListViewModel.Evaluate();
+        }
+
+
 
     }
 }

@@ -24,14 +24,14 @@ namespace nnunet_client.models
         {
             get => _name;
             // Use SetProperty to set the backing field and raise PropertyChanged
-            set => SetProperty(ref _name, value);
+            set => SetProperty(ref _name, value, nameof(Name));
         }
 
         public string Description
         {
             get => _description;
             // Use SetProperty to set the backing field and raise PropertyChanged
-            set => SetProperty(ref _description, value);
+            set => SetProperty(ref _description, value, nameof(Description));
         }
 
         private ObservableCollection<string> _contourTypes = new ObservableCollection<string>() {
@@ -52,7 +52,7 @@ namespace nnunet_client.models
         {
             get => _contourList;
             // Use SetProperty to set the backing field and raise PropertyChanged
-            set => SetProperty(ref _contourList, value);
+            set => SetProperty(ref _contourList, value, nameof(ContourList));
         }
 
 
@@ -70,13 +70,13 @@ namespace nnunet_client.models
             public string Id
             {
                 get => _id;
-                set => SetProperty(ref _id, value);
+                set => SetProperty(ref _id, value, nameof(Id));
             }
 
             public string Type
             {
                 get => _type;
-                set => SetProperty(ref _type, value);
+                set => SetProperty(ref _type, value, nameof(Type));
             }
 
             [JsonIgnore]
@@ -86,7 +86,7 @@ namespace nnunet_client.models
                 set
                 {
                     // Use SetProperty for the Color field
-                    if (SetProperty(ref _color, value))
+                    if (SetProperty(ref _color, value, nameof(Color)))
                     {
                         // Crucially, when Color changes, we must also notify that 
                         // the dependent properties ColorString and ColorBrush have changed.
@@ -126,25 +126,25 @@ namespace nnunet_client.models
             public bool HighResolution
             {
                 get => _highResolution;
-                set => SetProperty(ref _highResolution, value);
+                set => SetProperty(ref _highResolution, value, nameof(HighResolution));
             }
 
             public string ModelId
             {
                 get => _modelId;
-                set => SetProperty(ref _modelId, value);
+                set => SetProperty(ref _modelId, value, nameof(ModelId));
             }
 
             public string ModelLabelName
             {
                 get => _modelLabelName;
-                set => SetProperty(ref _modelLabelName, value);
+                set => SetProperty(ref _modelLabelName, value, nameof(ModelLabelName));
             }
 
             public int ModelLabelNumber
             {
                 get => _modelLabelNumber;
-                set => SetProperty(ref _modelLabelNumber, value);
+                set => SetProperty(ref _modelLabelNumber, value, nameof(ModelLabelNumber));
             }
 
             [JsonIgnore]
@@ -155,7 +155,7 @@ namespace nnunet_client.models
                 {
                     if (_status == value) return; 
 
-                    SetProperty(ref _status, value);
+                    SetProperty(ref _status, value, nameof(Status));
                 
                     OnPropertyChanged(nameof(StatusCode));
                 }

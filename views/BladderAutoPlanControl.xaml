@@ -160,12 +160,23 @@
 
             <!-- Course -->
             <GroupBox Header="Course" Grid.Row="2" Width="200" HorizontalAlignment="Left">
-                <ComboBox
-                     ItemsSource="{Binding Patient.Courses}"
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox
+                     ItemsSource="{Binding Courses}"
                      DisplayMemberPath="Id"
                      SelectedItem="{Binding Course}"
                      Width="150"
+                     Margin="0"
                  />
+                    <Button 
+                        ToolTip="Add a new course"
+                        Command="{Binding AddNewCourseCommand}"
+                        Padding="5" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                        +
+                    </Button>
+                </StackPanel>
+                
+                
             </GroupBox>
 
             <!-- Plan-->
@@ -199,6 +210,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
@@ -254,8 +266,22 @@
                                         Padding="5" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Left">+</Button>
                                 </StackPanel>
 
+                                <!-- Machine/Energy -->
+                                <Label Grid.Row="0" Grid.Column="8" Content="Machine/Energy" Style="{StaticResource ColumnHeadLabelStyle}"/>
+                                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="8">
+                                    <ComboBox 
+                                       ItemsSource="{Binding ExternalBeamMachineParametersList}"
+                                       DisplayMemberPath="MachineId"
+                                       SelectedItem="{Binding SelectedExternalBeamMachineParameters}"
+                                       Margin="0,5"
+                                       />
+                                    <TextBlock 
+                                         Text ="{Binding SelectedExternalBeamMachineParameters.EnergyModeId}" />
+                                </StackPanel>
+                                
+
                                 <!-- Create and Optimize -->
-                                <Button Grid.Row="1" Grid.Column="8"
+                                <Button Grid.Row="1" Grid.Column="9"
                                         ToolTip="Create a plan and optimize"
                                       Command="{Binding CreatePlanAndOptimizeCommand}"
                                       Content="Create and Optimize" 

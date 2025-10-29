@@ -22,7 +22,7 @@ namespace nnunet_client.viewmodels
         public T SelectedItem
         {
             get => _selectedItem;
-            set => SetProperty(ref _selectedItem, value);
+            set => SetProperty(ref _selectedItem, value, nameof(SelectedItem));
         }
 
         // Commands

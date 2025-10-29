@@ -448,7 +448,7 @@ namespace nnunet_client.viewmodels
             _esapiApp = esapiApp;
             
             // init folders
-            root_dir = filesystem.join(global.data_root_secure, "_dose_limits", true);
+            root_dir = filesystem.join(global.appConfig.data_root_secure, "_dose_limits", true);
             
             // initialize collection from ESAPI
             PatientNameIdList = new ObservableCollection<string>(

@@ -81,8 +81,8 @@ namespace nnunet_client
         public static void make_cbct_art_plans_3mm(VMS.TPS.Common.Model.API.Application app)
         {
             vmsApp = app;
-            global.data_root_secure = @"G:\data_secure";
-            global.make_export_log = false; // do not make export_log.
+            global.appConfig.data_root_secure = @"G:\data_secure";
+            global.appConfig.make_export_log = false; // do not make export_log.
 
             string nnunet_data_dir = @"G:\data_secure\_bladder_art\nnunet";
             string nnunet_raw_dir = filesystem.join(nnunet_data_dir, "raw", false);
@@ -284,7 +284,7 @@ namespace nnunet_client
             ps_dst.SetCalculationModel(CalculationType.PhotonVolumeDose, "AAA_13623");
             ps_dst.SetCalculationModel(CalculationType.PhotonLeafMotions, "Smart LMC [13.6.23]");
 
-            if(ps_dst.Beams.ElementAt(0).ControlPoints.Count() < 10 )
+            if (ps_dst.Beams.ElementAt(0).ControlPoints.Count() < 10 )
             {
 
                 CalculationResult lmc_result = ps_dst.CalculateLeafMotions();
@@ -468,7 +468,7 @@ namespace nnunet_client
 
         public static void find_plans(string pid_file, string plan_id, string out_file)
         {
-            global.make_export_log = false; // do not make export_log.
+            global.appConfig.make_export_log = false; // do not make export_log.
 
             
             _log_file = out_file+".log";
@@ -548,7 +548,7 @@ namespace nnunet_client
 
         public static void eval_dvh(string[] art_plans, VMS.TPS.Common.Model.API.Application app)
         {
-            global.make_export_log = false; // do not make export_log.
+            global.appConfig.make_export_log = false; // do not make export_log.
 
             string pid_file = @"G:\data_secure\_bladder_art\bladder_16_pids.txt";
             string result_csv = @"G:\data_secure\_bladder_art\bladder_16_pids.3_plans.dvhs.3.csv";
@@ -1495,6 +1495,7 @@ namespace nnunet_client
             VMSStructureSet sset,
             VMSCourse course,
             VMSReferencePoint primary_reference_point,
+            ExternalBeamMachineParameters machine,
             string ps_id,
             string ptv_id,
             string bladder_id,
@@ -1653,7 +1654,7 @@ namespace nnunet_client
             //new_ps.SetPrescription(ps.NumberOfFractions??0, ps.DosePerFraction, ps.TreatmentPercentage);
             ps.SetPrescription(num_fxs, new DoseValue(dose_per_fx, DoseValue.DoseUnit.cGy), 1.0);
 
-            ExternalBeamMachineParameters machine = new ExternalBeamMachineParameters("SIL 21IX", "6X", 600, "STATIC", "");
+            
             VVector isocenter = s_ptv.CenterPoint;
 
             _info("Adding Beams...");
@@ -1718,15 +1719,20 @@ namespace nnunet_client
 
 
             // public void SetCalculationModel(
-            _info("Setting calculation models...");
-            ps.SetCalculationModel(CalculationType.PhotonOptimization, optimization_model);
-            ps.SetCalculationModel(CalculationType.PhotonVolumeDose, volume_dose_calculation_model);
+            //_info("Setting calculation models...");
+            //ps.SetCalculationModel(CalculationType.PhotonOptimization, optimization_model);
+            //ps.SetCalculationModel(CalculationType.PhotonVolumeDose, volume_dose_calculation_model);
+
+            // just use default LMC (?)
+            //ps.SetCalculationModel(CalculationType.PhotonLeafMotions, "Smart LMC [13.6.23]");
+
+            _info("setting up optimization...");
 
             // optimization
             OptimizationSetup os = ps.OptimizationSetup;
-            
 
-            os.UseJawTracking = use_jaw_tracking;
+            //_info($"use_jaw_tracking={use_jaw_tracking}");
+            //os.UseJawTracking = use_jaw_tracking;
             
             //OptimizationNormalTissueParameter nto = os.AddAutomaticNormalTissueObjective(0.1);
 
@@ -1814,18 +1820,36 @@ namespace nnunet_client
             _info("calculating LMC...");
             await Task.Delay(task_delay_milliseconds);
 
-            bool fixedJaw = true;
-            LMCVOptions lmc_options = new LMCVOptions(fixedJaw);
+            //bool fixedJaw = true;
+            //LMCVOptions lmc_options = new LMCVOptions(fixedJaw);
+            
 
             stopwatch.Restart();
-            CalculationResult lmc_result = ps.CalculateLeafMotions(lmc_options);
+
+            CalculationResult lmc_result;
+            try
+            {
+                _info("trying SmartLMC options...");
+                bool fixedFieldBorders = false;
+                _info($"fixedFieldBorders={fixedFieldBorders}");
+                _info($"use_jaw_tracking={use_jaw_tracking}");
+                lmc_result = ps.CalculateLeafMotions(new SmartLMCOptions(fixedFieldBorders, use_jaw_tracking));
+            }
+            catch (Exception ex)
+            {
+                bool fixedJaws = !use_jaw_tracking;
+                _info("didn't work. trying LMCVOptions...");
+                _info($"fixedJaws={fixedJaws}");
+                lmc_result = ps.CalculateLeafMotions(new LMCVOptions(fixedJaws));
+            }
+
             stopwatch.Stop();
             _info($"finished. LMC calculation took {(stopwatch.ElapsedMilliseconds / 1000.0 / 60.0).ToString("0.0")} minutes.");
             await Task.Delay(task_delay_milliseconds);
 
             if (!lmc_result.Success)
             {
-                global.vmsApplication.ClosePatient();
+                //global.vmsApplication.ClosePatient();
                 _err("LMC Calculation Failed");
             }
 

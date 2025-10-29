@@ -1,21 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
+using System;
 using System;
 using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Linq;
 using System.Text;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows;
 using System.Windows.Input;
-
+using System.Windows.Media;
+using VMS.TPS.Common.Model.Types;
 using static esapi.esapi;
 using VMSCourse = VMS.TPS.Common.Model.API.Course;
 using VMSHospital = VMS.TPS.Common.Model.API.Hospital;
@@ -28,7 +29,6 @@ using VMSSeries = VMS.TPS.Common.Model.API.Series;
 using VMSStructure = VMS.TPS.Common.Model.API.Structure;
 using VMSStructureSet = VMS.TPS.Common.Model.API.StructureSet;
 using VMSStudy = VMS.TPS.Common.Model.API.Study;
-using System.Threading;
 
 namespace nnunet_client.viewmodels
 {
@@ -39,6 +39,8 @@ namespace nnunet_client.viewmodels
 
         public ICommand AddNewPrimaryReferencePointCommand { get; }
 
+        public ICommand AddNewCourseCommand { get; }
+
 
         // construction
         public BladderAutoPlanViewModel()
@@ -46,6 +48,31 @@ namespace nnunet_client.viewmodels
             MakePTVCommand = new RelayCommand(CreatePTV);
             CreatePlanAndOptimizeCommand = new RelayCommand(CreatePlanAndIOptimize);
             AddNewPrimaryReferencePointCommand = new RelayCommand(AddNewPrimaryReferencePoint);
+            AddNewCourseCommand = new RelayCommand(AddNewCourse);
+
+            ExternalBeamMachineParametersList = new ObservableCollection<ExternalBeamMachineParameters>()
+            {
+                new ExternalBeamMachineParameters("Edge", "6X", 600, "STATIC", ""),
+                new ExternalBeamMachineParameters("TrueBeam", "6X", 600, "STATIC", ""),
+                new ExternalBeamMachineParameters("SIL 21IX", "6X", 600, "STATIC", "")
+            };
+
+            SelectedExternalBeamMachineParameters = ExternalBeamMachineParametersList[0];
+        }
+
+
+        private ObservableCollection<ExternalBeamMachineParameters> _externalBeamMachineParametersList;
+        public ObservableCollection<ExternalBeamMachineParameters> ExternalBeamMachineParametersList
+        {
+            get => _externalBeamMachineParametersList;
+            set => SetProperty(ref _externalBeamMachineParametersList, value, nameof(ExternalBeamMachineParametersList));
+        }
+
+        private ExternalBeamMachineParameters _selectedExternalBeamMachineParameters;
+        public ExternalBeamMachineParameters SelectedExternalBeamMachineParameters
+        {
+            get => _selectedExternalBeamMachineParameters;
+            set => SetProperty(ref _selectedExternalBeamMachineParameters, value, nameof(SelectedExternalBeamMachineParameters));
         }
 
         private void AddNewPrimaryReferencePoint()
@@ -84,10 +111,7 @@ namespace nnunet_client.viewmodels
                     _patient.AddReferencePoint(true, userInput);
                 }
 
-                helper.log($"Saving...");
-                global.vmsApplication.SaveModifications();
-
-
+                
                 // notify the list changed
                 OnPropertyChanged(nameof(ReferencePoints));
 
@@ -103,6 +127,55 @@ namespace nnunet_client.viewmodels
 
         }
 
+        private void AddNewCourse()
+        {
+            if (_patient == null)
+            {
+                helper.show_error_msg_box("Please select a patient first");
+                return;
+            }
+
+            helper.log("Adding a new course");
+
+            // 1. Create the dialog, passing the required prompt text
+            var inputDialog = new views.InputDialog("Enter Course ID:");
+
+            // 2. Show the dialog modally and check the result
+            bool? result = inputDialog.ShowDialog();
+
+            if (result == true)
+            {
+                // User clicked OK or pressed Enter
+                string userInput = inputDialog.InputText?.Trim();
+                helper.log($"User entered: {userInput}");
+
+                if (userInput.Trim() == "")
+                {
+                    helper.log("User input is blank.");
+                    return;
+                }
+
+                _patient.BeginModifications();
+
+                // add course
+                helper.log($"Adding a reference point [{userInput}] to patient...");
+                VMSCourse cs = _patient.AddCourse();
+                cs.Id = userInput;
+
+                // notify the list changed
+                OnPropertyChanged(nameof(Courses));
+
+                // set as the selected course
+                Course = cs;
+            }
+            else
+            {
+                // User clicked Cancel or closed the window
+                System.Console.WriteLine("Input cancelled by user.");
+            }
+
+
+        }
 
         private VMSPatient _patient = null;
         public VMSPatient Patient
@@ -117,11 +190,17 @@ namespace nnunet_client.viewmodels
 
                 // update reference point list
                 OnPropertyChanged(nameof(ReferencePoints));
+                
+                // update course list
+                OnPropertyChanged(nameof(Courses));
 
-                //helper.log("Patient Reference Points");
-                //foreach(VMSReferencePoint point in ReferencePoints)
-                //    helper.log($"\t{point.Id}");
+                
             }
+        }
+
+        public IEnumerable<VMSCourse> Courses
+        {
+            get => (_patient != null) ? _patient.Courses : null;
         }
 
         private VMSCourse _course;
@@ -145,12 +224,12 @@ namespace nnunet_client.viewmodels
         public VMSReferencePoint PrimaryReferencePoint
         {
             get => _primaryReferencePoint;
-            set => SetProperty(ref _primaryReferencePoint, value);
+            set => SetProperty(ref _primaryReferencePoint, value, nameof(PrimaryReferencePoint));
         }
 
-        string bladder_id = "Bladder";
-        string bowel_id = "Bowel";
-        string rectum_id = "Rectum";
+        string bladder_id = "BladderAC";
+        string bowel_id = "BowelAC";
+        string rectum_id = "RectumAC";
 
         VMSImage _image = null;
         public VMSImage Image
@@ -197,7 +276,7 @@ namespace nnunet_client.viewmodels
             {
                 if(_structureSet == value) return;
 
-                SetProperty(ref _structureSet, value);
+                SetProperty(ref _structureSet, value, nameof(StructureSet));
 
                 if (_structureSet != null)
                 {
@@ -246,7 +325,19 @@ namespace nnunet_client.viewmodels
         public VMSPlanSetup Plan
         {
             get => _plan;
-            set => SetProperty<VMSPlanSetup>(ref _plan, value);
+            set {
+
+                Console.WriteLine($"BladderAutoPlanViewModel.Plan.set(value={value?.Id})");
+
+                if (_plan == value)
+                {
+                    Console.WriteLine("BladderAutoPlanViewModel.Plan.set() - given plan is the same as the current plan. so, returning...");
+                    return;
+                }
+
+                Console.WriteLine($"BladderAutoPlanViewModel.Plan.set() - setting plan...({value?.Id})");
+                SetProperty<VMSPlanSetup>(ref _plan, value, nameof(Plan));
+            }
         }
 
         
@@ -378,10 +469,7 @@ namespace nnunet_client.viewmodels
 
             helper.log("ptv created!");
 
-            helper.log("Savign modifications...");
-            global.vmsApplication.SaveModifications();
-
-
+            
             // notify the structure set change
             OnPropertyChanged(nameof(StructureSet));
 
@@ -458,9 +546,7 @@ namespace nnunet_client.viewmodels
                 _optiBowelId);
             helper.log($"opti contours created ({_optiRectumId},{_optiBowelId})");
 
-            helper.log("savign modificatinos...");
-            global.vmsApplication.SaveModifications();
-
+           
             // notify the structure set change
             OnPropertyChanged(nameof(StructureSet));
 
@@ -475,7 +561,7 @@ namespace nnunet_client.viewmodels
             get => _numberOfBeams; 
             set {
                 if (_numberOfBeams == value) return;
-                SetProperty(ref _numberOfBeams, value);
+                SetProperty(ref _numberOfBeams, value, nameof(NumberOfBeams));
             }
         }
 
@@ -487,7 +573,7 @@ namespace nnunet_client.viewmodels
             {
                 if(_dosePerFraction == value) return;
 
-                SetProperty(ref _dosePerFraction, value);
+                SetProperty(ref _dosePerFraction, value, nameof(DosePerFraction));
 
                 OnPropertyChanged(nameof(TotalDose));
             }
@@ -501,7 +587,7 @@ namespace nnunet_client.viewmodels
             {
                 if (_numberOfFractions == value) return;
 
-                SetProperty(ref _numberOfFractions, value);
+                SetProperty(ref _numberOfFractions, value, nameof(NumberOfFractions));
 
                 OnPropertyChanged(nameof(TotalDose));
             }
@@ -516,18 +602,18 @@ namespace nnunet_client.viewmodels
             }
         }
 
-        private bool _useJawTracking = false;
+        private bool _useJawTracking = true;
         public bool UseJawTracking
         {
             get => _useJawTracking;
-            set => SetProperty(ref _useJawTracking, value);
+            set => SetProperty(ref _useJawTracking, value, nameof(UseJawTracking));
         }
 
         private bool _useIntermediateDoseCalculation = true;
         public bool UseIntermediateDoseCalculation
         {
             get =>_useIntermediateDoseCalculation;
-            set => SetProperty(ref _useIntermediateDoseCalculation, value);
+            set => SetProperty(ref _useIntermediateDoseCalculation, value, nameof(UseIntermediateDoseCalculation));
         }
 
         private async void CreatePlanAndIOptimize()
@@ -588,6 +674,13 @@ namespace nnunet_client.viewmodels
                 return;
             }
 
+            // primary reference point
+            if (_selectedExternalBeamMachineParameters == null)
+            {
+                helper.show_error_msg_box($"Machine not selected!");
+                return;
+            }
+
             // print
             helper.log($"Patient={_patient.Id}");
             helper.log($"Image={_image.Id}");
@@ -601,8 +694,8 @@ namespace nnunet_client.viewmodels
             if (esapi.esapi.ps_of_id(_newPlanId, _patient) != null)
             {
                 // override?
-                if (!helper.show_yes_no_msg_box($"Plan already exitsts (Id={_newPlanId}). Do you want to override?"))
-                    return;
+                helper.show_error_msg_box($"Plan already exitsts (Id={_newPlanId})!");
+                return;
             }
 
 
@@ -641,11 +734,16 @@ namespace nnunet_client.viewmodels
                 string optimization_model = "PO_13623";
                 string volume_dose_calculation_model = "AAA_13623";
 
-                Plan = (VMSPlanSetup) await bladder_art.create_bladder_plan4(
+                ExternalBeamMachineParameters machineParameters = SelectedExternalBeamMachineParameters;
+                helper.log($"MachineId={machineParameters.MachineId}");
+                helper.log($"EnergyModeId={machineParameters.EnergyModeId}");
+
+                VMSPlanSetup ps = (VMSPlanSetup) await bladder_art.create_bladder_plan4(
                     _patient,
                     _structureSet,
                     _course,
                     _primaryReferencePoint,
+                    machineParameters,
                     _newPlanId,
                     _ptv.Id,
                     _bladder.Id,
@@ -664,6 +762,10 @@ namespace nnunet_client.viewmodels
                     task_delay_milliseconds
                 );
 
+                //ps.PlanNormalizationValue = 50.0;
+
+                Plan = ps;
+
                 if (Plan != null)
                 {
                     // set dose limits
@@ -671,9 +773,7 @@ namespace nnunet_client.viewmodels
                     Plan.PrimaryReferencePoint.SessionDoseLimit = new VMS.TPS.Common.Model.Types.DoseValue(DosePerFraction, "cGy");
                     Plan.PrimaryReferencePoint.TotalDoseLimit = new VMS.TPS.Common.Model.Types.DoseValue(TotalDose, "cGy");
 
-                    // saving changes...
-                    helper.log("Saving changes");
-                    global.vmsApplication.SaveModifications();
+                    
                 }
 
                 helper.log("Done.");

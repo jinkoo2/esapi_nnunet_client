@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>nnunet_client</RootNamespace>
     <AssemblyName>esapi_nnunet_client</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
@@ -20,7 +20,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\debug</OutputPath>
+    <OutputPath>\\VarianFS\VA_DATA%24\ProgramData\Vision\PublishedScripts\bladder_art\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -236,6 +236,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.xml.cs" />
+    <Compile Include="AppConfig.cs" />
+    <Compile Include="AutoContourWindow.xaml.cs">
+      <DependentUpon>AutoContourWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="bladder_art.cs" />
     <Compile Include="DoseLimitChecker.xaml.cs">
       <DependentUpon>DoseLimitChecker.xaml</DependentUpon>
@@ -250,6 +254,7 @@
     <Compile Include="models\DoubleWithUnit.cs" />
     <Compile Include="models\Person.cs" />
     <Compile Include="models\Prescription.cs" />
+    <Compile Include="models\StepPage.cs" />
     <Compile Include="piduuid.cs" />
     <Compile Include="DoseLimitEditorWindow.xaml.cs">
       <DependentUpon>DoseLimitEditorWindow.xaml</DependentUpon>
@@ -267,7 +272,9 @@
     <Compile Include="viewmodels\DoseLimitListViewModel.cs" />
     <Compile Include="viewmodels\ListManagerViewModel.cs" />
     <Compile Include="viewmodels\RelayCommand.cs" />
+    <Compile Include="viewmodels\RelayCommand2.cs" />
     <Compile Include="viewmodels\SegmentationTemplateEditorViewModel.cs" />
+    <Compile Include="viewmodels\StepNevigatorViewModel.cs" />
     <Compile Include="views\AutoContourControl.xaml.cs">
       <DependentUpon>AutoContourControl.xaml</DependentUpon>
     </Compile>
@@ -306,13 +313,23 @@
       <DependentUpon>SegmentationTemplateEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="viewmodels\PrescriptionListViewModel.cs" />
+    <Compile Include="views\StepNavigator.xaml.cs">
+      <DependentUpon>StepNavigator.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="config.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="_data\seg\templates\bladder_art.json" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="AutoContourWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="BladderART.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -377,6 +394,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="views\StepNavigator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\esapi\esapi.csproj">
@@ -401,6 +422,7 @@
     <Content Include="App.xml" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Themes\" />
     <Folder Include="_data\doselimit\cases\" />
     <Folder Include="_data\doselimit\templates\" />
   </ItemGroup>
@@ -412,4 +434,13 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\create_plan\packages\MaterialDesignThemes.5.2.1\build\MaterialDesignThemes.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\create_plan\packages\MaterialDesignThemes.5.2.1\build\MaterialDesignThemes.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>echo Copying SimpleITK native DLLs...
+xcopy /Y /R "C:\Users\jkim20\Documents\Eclipse Scripting API\Projects\create_plan\packages\SimpleITK-win64-CSharp-x64.1.0.0.1\lib\*.dll" "$(TargetDir)"
+
+echo Copying all json files...
+xcopy "$(ProjectDir)*.json" "$(TargetDir)" /Y
+
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

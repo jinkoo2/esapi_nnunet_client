@@ -59,12 +59,12 @@ namespace nnunet_client.viewmodels
             }
 
 
-            string dataDir = global.app_data_dir;
+            string dataDir = global.appConfig.app_data_dir;
             string casesDir = helper.join(helper.join(dataDir, "seg"), "cases");
             string reqImageId = $"{_image.Id}!{_image.UID}!{_image.FOR}!{global.vmsPatient.Id}";
             string caseDir = helper.join(helper.join(casesDir, global.vmsPatient.Id), reqImageId);
 
-            string nnunetServerUrl = global.nnunet_server_url;
+            string nnunetServerUrl = global.appConfig.nnunet_server_url;
             nnUNetServicClient client = new nnUNetServicClient(nnunetServerUrl);
 
             // Cache to avoid repeated server calls

@@ -16,7 +16,7 @@ namespace nnunet_client
             dict_uuid2pid = new Dictionary<string, string>();
             dict_pid2uuid = new Dictionary<string, string>();
 
-            string file = System.IO.Path.Combine(global.data_root_secure, "id2uuid.txt");
+            string file = System.IO.Path.Combine(global.appConfig.data_root_secure, "id2uuid.txt");
             string[] lines = System.IO.File.ReadAllLines(file);
             foreach (string line in lines)
             {

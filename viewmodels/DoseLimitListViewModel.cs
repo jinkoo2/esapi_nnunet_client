@@ -72,15 +72,21 @@ namespace nnunet_client.viewmodels
             }
             set
             {
-                if (value != _plan)
+                if (_plan == value)
                 {
-                    Console.WriteLine($"DoseLimitListViewModel - Setting a new plan...{_plan?.Id}");
-                    SetProperty<VMS.TPS.Common.Model.API.PlanningItem>(ref _plan, value);
+                    Console.WriteLine($"DoseLimitListViewModel - Given plan is the same as the current plan, so returning...{_plan?.Id}");
+                    return;
+                }
 
+                Console.WriteLine($"DoseLimitListViewModel - Setting a new plan...{value?.Id}");
+                SetProperty<VMS.TPS.Common.Model.API.PlanningItem>(ref _plan, value, nameof(Plan));
+
+                if (_plan != null)
+                {
                     // set plan to the dose limits
                     foreach (DoseLimit doseLimit in this.DoseLimits)
                     {
-                        doseLimit.Plan = value;
+                        doseLimit.Plan = _plan;
                     }
 
                     // update Contours
@@ -91,7 +97,15 @@ namespace nnunet_client.viewmodels
                 }
                 else
                 {
+                    Console.WriteLine($"DoseLimitListViewModel - plan is null. clearning Contours list and setting null to DoseLimits...");
+
                     Contours = new ObservableCollection<models.Contour>();
+
+                    // reset plan
+                    foreach (DoseLimit doseLimit in this.DoseLimits)
+                    {
+                        doseLimit.Plan = null;
+                    }
                 }
             }
         }
@@ -110,6 +124,16 @@ namespace nnunet_client.viewmodels
         {
             get => _doseLimits;
             set => SetProperty<ObservableCollection<DoseLimit>>(ref _doseLimits, value);
+        }
+
+        public void Evaluate()
+        {
+            if (_doseLimits == null) return;
+
+            foreach (DoseLimit doseLimit in _doseLimits)
+            {
+                doseLimit.Evaluate();
+             }
         }
 
         private DoseLimit _selectedDoseLimit;

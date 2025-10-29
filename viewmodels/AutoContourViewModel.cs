@@ -32,11 +32,11 @@ namespace nnunet_client.viewmodels
     {
         public AutoContourViewModel()
         {
-            nnUNetServerURL = global.nnunet_server_url;
+            nnUNetServerURL = global.appConfig.nnunet_server_url;
             helper.log($"nnUNetServerURL={nnUNetServerURL}");
 
             // load templates
-            string dataDir = global.app_data_dir;
+            string dataDir = global.appConfig.app_data_dir;
             string templateDir = Path.Combine(dataDir, "seg", "templates");
             if (!Directory.Exists(templateDir))
             {
@@ -131,7 +131,7 @@ namespace nnunet_client.viewmodels
             if (_image == null)
                 throw new Exception("Image not set");
 
-            string dataDir = global.app_data_dir;
+            string dataDir = global.appConfig.app_data_dir;
             string casesDir = Path.Combine(dataDir, "seg", "cases");
             string reqImageId = $"{_image.Id}!{_image.UID}!{_image.FOR}!{global.vmsPatient.Id}";
             string caseDir = Path.Combine(casesDir, global.vmsPatient.Id, reqImageId);
@@ -214,15 +214,15 @@ namespace nnunet_client.viewmodels
 
             try
             {
-                string requesterId = global.nnunet_requester_id;
+                string requesterId = global.appConfig.nnunet_requester_id;
 
                 var metadata = new Dictionary<string, string>
                 {
                     { "requester_id", requesterId },
                     { "image_id", imageId },
-                    { "user", global.nnunet_request_user_name },
-                    { "email", global.nnunet_request_user_email },
-                    { "institution", global.nnunet_request_user_institution },
+                    { "user", global.appConfig.nnunet_request_user_name },
+                    { "email", global.appConfig.nnunet_request_user_email},
+                    { "institution", global.appConfig.nnunet_request_user_institution },
                     { "notes", "submitted for prediction" },
                             {"dataset_id", datasetId }
                 };
@@ -248,138 +248,151 @@ namespace nnunet_client.viewmodels
 
         public async Task<string[]> ImportPredictedContours()
         {
-            helper.log("ImportContoursButton_Click()");
+            helper.log("Importing contours...");
 
             if (Image == null || SelectedTemplate == null)
             {
                 throw new Exception("No image or template selected.");
             }
 
-            SegmentationTemplate template = this.SegmentationTemplateEditorViewModel.Template;
-            string dataDir = global.app_data_dir;
-            string casesDir = Path.Combine(dataDir, "seg", "cases");
-            string reqImageId = $"{_image.Id}!{_image.UID}!{_image.FOR}!{global.vmsPatient.Id}";
-            string caseDir = Path.Combine(casesDir, global.vmsPatient.Id, reqImageId);
-            helper.log($"dataDir={dataDir}");
-            helper.log($"casesDir={casesDir}");
-            helper.log($"reqImageId={reqImageId}");
-            helper.log($"caseDir={caseDir}");
+            
+                SegmentationTemplate template = this.SegmentationTemplateEditorViewModel.Template;
+                string dataDir = global.appConfig.app_data_dir;
+                string casesDir = Path.Combine(dataDir, "seg", "cases");
+                string reqImageId = $"{_image.Id}!{_image.UID}!{_image.FOR}!{global.vmsPatient.Id}";
+                string caseDir = Path.Combine(casesDir, global.vmsPatient.Id, reqImageId);
+                helper.log($"dataDir={dataDir}");
+                helper.log($"casesDir={casesDir}");
+                helper.log($"reqImageId={reqImageId}");
+                helper.log($"caseDir={caseDir}");
 
-            helper.log($"nnunetServerUrl={nnUNetServerURL}");
-            var client = new nnunet.nnUNetServicClient(nnUNetServerURL);
+                helper.log($"nnunetServerUrl={nnUNetServerURL}");
+                var client = new nnunet.nnUNetServicClient(nnUNetServerURL);
 
-            List<VMSStructureSet> sset_list = esapi.esapi.sset_list_of_image_id_FOR(_image.Id, _image.FOR, global.vmsPatient);
-            if (sset_list.Count == 0)
-            {
-                throw new Exception("Image has no StructureSet");
-            }
-            else if (sset_list.Count > 1)
-            {
-                throw new Exception("Image has multiple StructureSets (ambiguous)");
-            }
-
-            VMSStructureSet sset = sset_list[0];
-            helper.log($"sset={sset.Id}");
-
-            global.vmsPatient.BeginModifications();
-
-            List<string> importedContourIds = new List<string>();
-            foreach (SegmentationTemplate.ContourItem contour in template.ContourList)
-            {
-                helper.log($"Importing counter...Id={contour.Id}");
-
-                string modelId = contour.ModelId;
-                if (string.IsNullOrEmpty(modelId))
-                    continue;
-
-                string reqDir = Path.Combine(caseDir, modelId);
-                string responseFile = Path.Combine(reqDir, "req.response.json");
-
-                helper.log($"reqDir={reqDir}");
-                helper.log($"responseFile={responseFile}");
-
-                if (!File.Exists(responseFile))
+                List<VMSStructureSet> sset_list = esapi.esapi.sset_list_of_image_id_FOR(_image.Id, _image.FOR, global.vmsPatient);
+                if (sset_list.Count == 0)
                 {
-                    helper.log($"Missing response file: {responseFile}");
-                    continue;
+                    throw new Exception("Image has no StructureSet");
+                }
+                else if (sset_list.Count > 1)
+                {
+                    throw new Exception("Image has multiple StructureSets (ambiguous)");
                 }
 
-                dynamic response = JsonConvert.DeserializeObject(File.ReadAllText(responseFile));
-                string reqId = response?.req_id;
-                if (string.IsNullOrEmpty(reqId))
-                {
-                    helper.log($"req_id missing in {responseFile}");
-                    continue;
-                }
+                VMSStructureSet sset = sset_list[0];
+                helper.log($"sset={sset.Id}");
 
-                string datasetId = modelId.Split('.')[0];
-                int imageNumber = 0;
-                int contourNumber = contour.ModelLabelNumber;
-                string coordinateSystem = "w";
-                string jsonPath = Path.Combine(reqDir, $"contour_{contourNumber}.points_{coordinateSystem}.json");
+                // 1. Set the cursor to Wait at the very beginning
+                Mouse.OverrideCursor = Cursors.Wait;
 
-                try
+
+                global.vmsPatient.BeginModifications();
+
+                List<string> importedContourIds = new List<string>();
+                foreach (SegmentationTemplate.ContourItem contour in template.ContourList)
                 {
-                    if (!File.Exists(jsonPath))
+                    helper.log($"Importing counter...Id={contour.Id}");
+
+                    string modelId = contour.ModelId;
+                    if (string.IsNullOrEmpty(modelId))
+                        continue;
+
+                    string reqDir = Path.Combine(caseDir, modelId);
+                    string responseFile = Path.Combine(reqDir, "req.response.json");
+
+                    helper.log($"reqDir={reqDir}");
+                    helper.log($"responseFile={responseFile}");
+
+                    if (!File.Exists(responseFile))
                     {
-                        helper.log($"Requesting contour points from server for modelId={modelId}, label={contour.ModelLabelName}...");
-                        var result = await client.GetContourPointsAsync(datasetId, reqId, imageNumber, contourNumber, coordinateSystem);
+                        helper.log($"Missing response file: {responseFile}");
+                        continue;
+                    }
 
-                        if (result is Newtonsoft.Json.Linq.JObject obj &&
-                            obj.TryGetValue($"points_{coordinateSystem}", out var contourData))
+                    dynamic response = JsonConvert.DeserializeObject(File.ReadAllText(responseFile));
+                    string reqId = response?.req_id;
+                    if (string.IsNullOrEmpty(reqId))
+                    {
+                        helper.log($"req_id missing in {responseFile}");
+                        continue;
+                    }
+
+                    string datasetId = modelId.Split('.')[0];
+                    int imageNumber = 0;
+                    int contourNumber = contour.ModelLabelNumber;
+                    string coordinateSystem = "w";
+                    string jsonPath = Path.Combine(reqDir, $"contour_{contourNumber}.points_{coordinateSystem}.json");
+
+                    try
+                    {
+                        if (!File.Exists(jsonPath))
                         {
-                            helper.log($"Saved contour JSON to {jsonPath}...");
-                            File.WriteAllText(jsonPath, JsonConvert.SerializeObject(contourData, Formatting.Indented));
+                            helper.log($"Requesting contour points from server for modelId={modelId}, label={contour.ModelLabelName}...");
+                            var result = await client.GetContourPointsAsync(datasetId, reqId, imageNumber, contourNumber, coordinateSystem);
+
+                            if (result is Newtonsoft.Json.Linq.JObject obj &&
+                                obj.TryGetValue($"points_{coordinateSystem}", out var contourData))
+                            {
+                                helper.log($"Saved contour JSON to {jsonPath}...");
+                                File.WriteAllText(jsonPath, JsonConvert.SerializeObject(contourData, Formatting.Indented));
+                            }
+                            else
+                            {
+                                helper.log($"Key points_{coordinateSystem} not found in server response for modelId={modelId}");
+                                continue;
+                            }
                         }
                         else
                         {
-                            helper.log($"Key points_{coordinateSystem} not found in server response for modelId={modelId}");
-                            continue;
+                            helper.log($"Contour file already exists, skipping download: {jsonPath}");
+                        }
+
+                        // contour name (increase number if exists)
+                        string newContourId = contour.Id;
+                        //int count = 1;
+                        //while (esapi.esapi.s_of_id(newContourId, sset, false) != null)
+                        //{
+                        //    newContourId = $"{contour.Id}_{count}";
+                        //    count++;
+                        //}
+
+                        // Load points into StructureSet
+                        string dicomType = string.IsNullOrEmpty(contour.Type) ? "ORGAN" : contour.Type;
+                        helper.log($"Using DICOM type '{dicomType}' for structure '{newContourId}'");
+                        VMSStructure structure = esapi.esapi.find_or_add_s(dicomType, newContourId, sset);
+                        if (structure != null)
+                        {
+                            esapi.esapi.s_load_contour_data_from_cont_json_file(structure, jsonPath);
+                            structure.Color = contour.Color;  // Applies the template color to the structure
+                            helper.log($"Loaded contour into StructureSet: {structure.Id}, color={contour.Color}");
+
+                            importedContourIds.Add(contour.Id);
+                        }
+                        else
+                        {
+                            helper.log($"Failed to find or create structure for label: {contour.ModelLabelName}");
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        helper.log($"Contour file already exists, skipping download: {jsonPath}");
-                    }
-
-                    // contour name (increase number if exists)
-                    string newContourId = contour.Id;
-                    //int count = 1;
-                    //while (esapi.esapi.s_of_id(newContourId, sset, false) != null)
-                    //{
-                    //    newContourId = $"{contour.Id}_{count}";
-                    //    count++;
-                    //}
-
-                    // Load points into StructureSet
-                    string dicomType = string.IsNullOrEmpty(contour.Type) ? "ORGAN" : contour.Type;
-                    helper.log($"Using DICOM type '{dicomType}' for structure '{newContourId}'");
-                    VMSStructure structure = esapi.esapi.find_or_add_s(dicomType, newContourId, sset);
-                    if (structure != null)
-                    {
-                        esapi.esapi.s_load_contour_data_from_cont_json_file(structure, jsonPath);
-                        structure.Color = contour.Color;  // Applies the template color to the structure
-                        helper.log($"Loaded contour into StructureSet: {structure.Id}, color={contour.Color}");
-
-                        importedContourIds.Add(contour.Id);
-                    }
-                    else
-                    {
-                        helper.log($"Failed to find or create structure for label: {contour.ModelLabelName}");
+                        helper.log($"Error processing contour for modelId={modelId}: {ex.Message}");
+                        
+                        // reset mouse
+                        Mouse.OverrideCursor = null;
+                        throw new Exception($"Failed to import contour for:\n\nModel ID: {modelId}\nLabel: {contour.ModelLabelName}\n\n{ex.Message}");
+                        
                     }
                 }
-                catch (Exception ex)
-                {
-                    helper.log($"Error processing contour for modelId={modelId}: {ex.Message}");
-                    throw new Exception($"Failed to import contour for:\n\nModel ID: {modelId}\nLabel: {contour.ModelLabelName}\n\n{ex.Message}");
-                }
-            }
 
-            global.vmsApplication.SaveModifications();
+                
 
-            helper.log($"Contours imported ({string.Join(",", importedContourIds)})");
-            
+                helper.log($"Contours imported ({string.Join(",", importedContourIds)})");
+
+            // reset mouse    
+            Mouse.OverrideCursor = null;
+
             return importedContourIds.ToArray();
+
         }
 
 
@@ -424,6 +437,9 @@ namespace nnunet_client.viewmodels
 
             try
             {
+                // 1. Set the cursor to Wait at the very beginning
+                Mouse.OverrideCursor = Cursors.Wait;
+
                 helper.log("Submitting predicting request. Exporting an image can take a few minutes if not exported before...so be patient.");
                 await SubmitPredictionRequests();
             }
@@ -435,6 +451,9 @@ namespace nnunet_client.viewmodels
             finally
             {
                 ProcessIdle = true; // Unblock UI commands
+
+                // reset mouse
+                Mouse.OverrideCursor = null;
             }
         }
 

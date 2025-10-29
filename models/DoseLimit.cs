@@ -47,7 +47,7 @@ namespace nnunet_client.models
         public string Id
         {
             get => _id;
-            set => SetProperty(ref _id, value);
+            set => SetProperty(ref _id, value, nameof(Id));
         }
 
         private int _priority=1;
@@ -55,7 +55,7 @@ namespace nnunet_client.models
         public int Priority
         {
             get => _priority;
-            set => SetProperty(ref _priority, value);
+            set => SetProperty(ref _priority, value, nameof(Priority));
         }
 
         private Contour _contour;
@@ -66,7 +66,7 @@ namespace nnunet_client.models
             set {
                 if (_contour != value)
                 {
-                    SetProperty(ref _contour, value);
+                    SetProperty(ref _contour, value, nameof(Contour));
                     Evaluate();
                 }
             }
@@ -91,7 +91,7 @@ namespace nnunet_client.models
             {
                 if (_prescription != value)
                 {
-                    SetProperty(ref _prescription, value);
+                    SetProperty(ref _prescription, value, nameof(Prescription));
                     Evaluate();
                 }
             }
@@ -106,7 +106,7 @@ namespace nnunet_client.models
             {
                 if (_limit != value)
                 {
-                    SetProperty(ref _limit, value?.Trim());
+                    SetProperty(ref _limit, value?.Trim(), nameof(Limit));
 
                     Evaluate();
 
@@ -141,7 +141,7 @@ namespace nnunet_client.models
         public string ErrorMessage
         {
             get => _errorMessage;
-            set => SetProperty(ref _errorMessage, value?.Trim());
+            set => SetProperty(ref _errorMessage, value?.Trim(), nameof(ErrorMessage));
         }
 
         [JsonIgnore]  // not include in JSON
@@ -261,40 +261,63 @@ namespace nnunet_client.models
             {
                 if (_plan == value) return;
                 
-                Console.WriteLine($"DoseLimit: Setting a new plan... {_plan?.Id}");
-                SetProperty<VMS.TPS.Common.Model.API.PlanningItem>(ref _plan, value);
+                Console.WriteLine($"DoseLimit: Setting a new plan... to ({value?.Id})");
+                SetProperty(ref _plan, value, nameof(Plan));
 
-                // if contour is not set, set one if found from the contour list
-                if(_contour == null)
+                if (_plan == null || _plan.StructureSet == null)
                 {
-                    if (_plan != null && _plan.StructureSet != null)
+                    Contour = null;
+                    Value = null;
+                    Result = null;
+                    return;
+                }
+
+                // if contour is not set, set one if found from the plan structure list
+                if (_contour == null)
+                {
+                    VMSStructure s_found = _plan.StructureSet.Structures.FirstOrDefault(s => s.Id == Id);
+                    if (s_found != null)
                     {
-                        VMSStructure s_found = _plan.StructureSet.Structures.FirstOrDefault(s=> s.Id == Id);
-                        if (s_found != null)
-                        {
-                            Contour = new Contour() { Id = s_found.Id };
-                        }
+                        Contour = new Contour() { Id = s_found.Id };
+                    }
+                }
+                else // contour is present, check if the structure is present in Plan with matching Id
+                {
+                    VMSStructure s_found = _plan.StructureSet.Structures.FirstOrDefault(s => s.Id == _contour.Id);
+                    if (s_found != null)
+                    {
+                        Contour = new Contour() { Id = s_found.Id };
+                    }
+                    else
+                    {
+                        Contour = null;
+                        Value = null;
+                        Result = null;
+                        return;
                     }
                 }
 
-                if(_plan != null)
-                    Evaluate();
-                
+                Evaluate();
+               
             }
         }
 
-        private void Evaluate()
+        public void Evaluate()
         {
             Console.WriteLine("Evaluating dose limit...");
             if (_plan == null)
             {
                 this.ErrorMessage = "Plan is not set.";
+                this.Value = null;
+                this.Result = null;
                 return;
             }
 
             if (_contour == null)
             {
                 this.ErrorMessage = "Contour is not set";
+                this.Value = null;
+                this.Result = null;
                 return;
             }
 
@@ -302,6 +325,8 @@ namespace nnunet_client.models
             if(s == null)
             {
                 this.ErrorMessage = $"Structure not found - Id={_contour.Id}";
+                this.Value = null;
+                this.Result = null;
                 return;
             }
 
@@ -328,7 +353,7 @@ namespace nnunet_client.models
         public DoubleWithUnit Value
         {
             get => _value;
-            set => SetProperty(ref _value, value);
+            set => SetProperty(ref _value, value, nameof(Value));
         }
 
         // evaluated value
@@ -341,7 +366,7 @@ namespace nnunet_client.models
             {
                 if (_result == value) return;
 
-                SetProperty(ref _result, value);
+                SetProperty(ref _result, value, nameof(Result));
             }
         }
 
@@ -353,7 +378,7 @@ namespace nnunet_client.models
         public string Comments
         {
             get => _comments;
-            set => SetProperty(ref _comments, value);
+            set => SetProperty(ref _comments, value, nameof(Comments));
         }
 
         public DoseLimit Duplicate() => new DoseLimit() 
