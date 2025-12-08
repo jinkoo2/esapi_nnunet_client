@@ -602,7 +602,7 @@ namespace nnunet_client.viewmodels
             }
         }
 
-        private bool _useJawTracking = true;
+        private bool _useJawTracking = false;
         public bool UseJawTracking
         {
             get => _useJawTracking;

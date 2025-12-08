@@ -25,6 +25,12 @@ namespace nnunet_client
             }
         }
 
+        public static void log_for_debug(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+
         public static async Task log_and_yield(string message)
         {
             log(message);

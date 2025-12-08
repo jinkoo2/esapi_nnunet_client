@@ -240,6 +240,7 @@
     <Compile Include="AutoContourWindow.xaml.cs">
       <DependentUpon>AutoContourWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="BladderARTViewModel.cs" />
     <Compile Include="bladder_art.cs" />
     <Compile Include="DoseLimitChecker.xaml.cs">
       <DependentUpon>DoseLimitChecker.xaml</DependentUpon>

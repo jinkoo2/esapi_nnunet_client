@@ -24,6 +24,7 @@ using Newtonsoft.Json;
 using System.Collections;
 using nnunet_client.models;
 using System.Collections.ObjectModel;
+using System.Windows.Forms;
 
 namespace nnunet_client.viewmodels
 {
@@ -40,24 +41,42 @@ namespace nnunet_client.viewmodels
         public VMSImage Image
         {
             get => _image;
-            set => SetProperty<VMSImage>(ref _image, value);
+            set
+            {
+                if (_image != value)
+                {
+                    // clear status for new image
+                    helper.log_for_debug("Clearing Status for a new image set");
+                    ClearStatus();
+
+                    SetProperty<VMSImage>(ref _image, value, nameof(Image));
+                }
+            }
         }
 
+        public void ClearStatus()
+        {
+            if (_template != null)
+            {
+                foreach (var contour in _template.ContourList)
+                {
+                    contour.Status = "";
+                }
+            }
+        }
 
         public async Task<dynamic> UpdateStatus()
         {
             if (_image == null)
             {
-                // MessageBox.Show("Invalid image!");
+                ClearStatus();
                 return "ERROR";
             }
 
             if (_template == null)
             {
-                //MessageBox.Show("Invalid template!");
                 return "ERROR";
             }
-
 
             string dataDir = global.appConfig.app_data_dir;
             string casesDir = helper.join(helper.join(dataDir, "seg"), "cases");

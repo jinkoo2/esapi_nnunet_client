@@ -56,14 +56,20 @@ namespace nnunet_client.viewmodels
         {
             get => _image;
             set{
+                Console.WriteLine($"AutoContourViewModel.Image.set({value?.Id})...");
 
-                if (_image == value) 
+                if (_image == value)
+                {
+                    Console.WriteLine($"AutoContourViewModel.Image.set() - The given image is the same as the current image. So, exiting...");
                     return;
+                }
 
-                SetProperty<VMSImage>(ref _image, value);
+                // set image to the segmentation 
+                Console.WriteLine("Setting image to the segmentaiton editor view model...");
+                this.SegmentationTemplateEditorViewModel.Image = value;
 
-                if(this.SegmentationTemplateEditorViewModel != null)
-                    this.SegmentationTemplateEditorViewModel.Image = value;
+                Console.WriteLine("Setting new image...");
+                SetProperty<VMSImage>(ref _image, value, nameof(Image));
             }
         }
 
@@ -79,7 +85,7 @@ namespace nnunet_client.viewmodels
         public ObservableCollection<SegmentationTemplate> Templates
         {
             get => _templates;
-            set => SetProperty<ObservableCollection<SegmentationTemplate>>(ref _templates, value);
+            set => SetProperty<ObservableCollection<SegmentationTemplate>>(ref _templates, value, nameof(Templates));
         }
 
 
@@ -120,7 +126,7 @@ namespace nnunet_client.viewmodels
         public SegmentationTemplateEditorViewModel SegmentationTemplateEditorViewModel
         {
             get => _segmentationTemplateEditorViewModel;
-            set => SetProperty<SegmentationTemplateEditorViewModel>(ref _segmentationTemplateEditorViewModel, value);
+            set => SetProperty<SegmentationTemplateEditorViewModel>(ref _segmentationTemplateEditorViewModel, value, nameof(SegmentationTemplateEditorViewModel));
         }
 
         public async Task SubmitPredictionRequests()
@@ -325,7 +331,13 @@ namespace nnunet_client.viewmodels
 
                     try
                     {
-                        if (!File.Exists(jsonPath))
+                        if (File.Exists(jsonPath))
+                        {
+                            helper.log($"File exists. Deleting the file first... jasonPath={jsonPath}");
+                            File.Delete(jsonPath); 
+                        }
+                        
+                        // download
                         {
                             helper.log($"Requesting contour points from server for modelId={modelId}, label={contour.ModelLabelName}...");
                             var result = await client.GetContourPointsAsync(datasetId, reqId, imageNumber, contourNumber, coordinateSystem);
@@ -342,10 +354,10 @@ namespace nnunet_client.viewmodels
                                 continue;
                             }
                         }
-                        else
-                        {
-                            helper.log($"Contour file already exists, skipping download: {jsonPath}");
-                        }
+                        //else
+                        //{
+                        //    helper.log($"Contour file already exists, skipping download: {jsonPath}");
+                        //}
 
                         // contour name (increase number if exists)
                         string newContourId = contour.Id;
@@ -425,6 +437,19 @@ namespace nnunet_client.viewmodels
                 _err("Tempalte not set. Please select a template.");
                 return false;
             }
+
+            if (SegmentationTemplateEditorViewModel == null)
+            {
+                _err("Internal error: SegmentationTemplateEditorViewModel is null.");
+                return false;
+            }
+
+            if (SegmentationTemplateEditorViewModel.Image == null)
+            {
+                _err("Internal error: SegmentationTemplateEditorViewModel.Image is null.");
+                return false;
+            }
+
 
             return true;
         }

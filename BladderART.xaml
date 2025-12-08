@@ -167,7 +167,7 @@
 -->
                     <GroupBox Grid.Row="1" Header="Select Image">
                         <esapiui:ImageListDataGridControl
-                             x:Name="ImageListControl"
+                             DataContext="{Binding ImageListViewModel}"
                              HorizontalAlignment="Stretch"
                              VerticalAlignment="Stretch" 
                              MinHeight="300" />
@@ -179,15 +179,16 @@
             </TabItem>
 
 
-
             <!-- Auto Contour -->
             <TabItem Header="AutoContour">
-                <views:AutoContourControl x:Name="AutoContourControl"/>
+                <views:AutoContourControl 
+                    DataContext="{Binding AutoContourViewModel}"/>
             </TabItem>
 
             <!-- Auto Plan -->
             <TabItem Header="AutoPlan">
-                <views:BladderAutoPlanControl x:Name="AutoPlanControl"
+                <views:BladderAutoPlanControl
+                        DataContext="{Binding BladderAutoPlanViewModel}"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         Margin="10"/>
@@ -195,7 +196,8 @@
             
             <!-- Dose Limit Checker -->
             <TabItem Header="Dose Limit Check">
-                <views:DoseLimitListEditorControl x:Name="DoseLimitEditorControl"
+                <views:DoseLimitListEditorControl 
+                        DataContext="{Binding DoseLimitListEditorViewModel}"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         Margin="10"/>
