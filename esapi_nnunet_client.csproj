@@ -256,6 +256,7 @@
     <Compile Include="models\Person.cs" />
     <Compile Include="models\Prescription.cs" />
     <Compile Include="models\StepPage.cs" />
+    <Compile Include="nnUNetServiceClient.cs" />
     <Compile Include="piduuid.cs" />
     <Compile Include="DoseLimitEditorWindow.xaml.cs">
       <DependentUpon>DoseLimitEditorWindow.xaml</DependentUpon>
@@ -408,10 +409,6 @@
     <ProjectReference Include="..\MahApps.Metro-develop-net48\src\MahApps.Metro\MahApps.Metro.csproj">
       <Project>{5a3343ef-cec8-56d2-e32b-e98cbc4c592f}</Project>
       <Name>MahApps.Metro</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\nnunet\nnunet.csproj">
-      <Project>{ecf497e5-23f0-41a0-89be-b778692e41ba}</Project>
-      <Name>nnunet</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
