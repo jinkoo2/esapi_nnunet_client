@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -412,10 +412,6 @@
     <ProjectReference Include="..\nnunet\nnunet.csproj">
       <Project>{ecf497e5-23f0-41a0-89be-b778692e41ba}</Project>
       <Name>nnunet</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Projects\variandb\variandb.csproj">
-      <Project>{a78bc43e-ca46-4ad5-b078-e46db7025ead}</Project>
-      <Name>variandb</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

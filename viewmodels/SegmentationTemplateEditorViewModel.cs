@@ -84,7 +84,7 @@ namespace nnunet_client.viewmodels
             string caseDir = helper.join(helper.join(casesDir, global.vmsPatient.Id), reqImageId);
 
             string nnunetServerUrl = global.appConfig.nnunet_server_url;
-            nnUNetServicClient client = new nnUNetServicClient(nnunetServerUrl);
+            var client = new nnunet.nnUNetServicClient(nnunetServerUrl, global.appConfig.nnunet_server_auth_token);
 
             // Cache to avoid repeated server calls
             Dictionary<string, string> modelIdToStatus = new Dictionary<string, string>();

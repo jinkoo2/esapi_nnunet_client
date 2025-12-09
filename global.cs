@@ -67,6 +67,8 @@ namespace nnunet_client
                 Console.WriteLine($"Export Log Enabled: {settings.make_export_log}");
                 Console.WriteLine($"Requester ID: {settings.nnunet_requester_id}");
                 Console.WriteLine($"Server URL: {settings.nnunet_server_url}");
+                Console.WriteLine($"Server URL: {settings.nnunet_server_auth_email}");
+                Console.WriteLine($"Server URL: {settings.nnunet_server_auth_token}");
 
                 global.appConfig = settings;
             }

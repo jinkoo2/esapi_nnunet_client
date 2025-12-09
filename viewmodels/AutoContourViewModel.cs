@@ -216,7 +216,7 @@ namespace nnunet_client.viewmodels
                 throw new Exception("nnUNetServerURL not set");
 
             // submit for auto contouring using nnunet api client
-            nnunet.nnUNetServicClient client = new nnunet.nnUNetServicClient(nnUNetServerURL);
+            nnunet.nnUNetServicClient client = new nnunet.nnUNetServicClient(nnUNetServerURL, global.appConfig.nnunet_server_auth_token);
 
             try
             {
@@ -273,7 +273,7 @@ namespace nnunet_client.viewmodels
                 helper.log($"caseDir={caseDir}");
 
                 helper.log($"nnunetServerUrl={nnUNetServerURL}");
-                var client = new nnunet.nnUNetServicClient(nnUNetServerURL);
+                var client = new nnunet.nnUNetServicClient(nnUNetServerURL, global.appConfig.nnunet_server_auth_token);
 
                 List<VMSStructureSet> sset_list = esapi.esapi.sset_list_of_image_id_FOR(_image.Id, _image.FOR, global.vmsPatient);
                 if (sset_list.Count == 0)

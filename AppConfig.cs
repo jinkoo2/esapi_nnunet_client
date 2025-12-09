@@ -22,6 +22,8 @@ namespace nnunet_client
 
         public string app_data_dir { get; set; }
         public string nnunet_server_url { get; set; }
+        public string nnunet_server_auth_email { get; set; }
+        public string nnunet_server_auth_token { get; set; }
 
 
         /// <summary>
