@@ -96,7 +96,8 @@ namespace nnunet_client
 
                 //var window = new nnunet_client.DoseLimitEditorWindow();
                 //var window = new nnunet_client.DoseLimitChecker(vmsApp);
-                var window = new BladderART(vmsApp);
+                //var window = new BladderART(vmsApp);
+                var window = new SubmitImageAndLabelsWindow(vmsApp);
                 //var window = new AutoContourWindow();
 
 

@@ -173,10 +173,12 @@
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\create_plan\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.77\lib\net462\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\create_plan\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\NewtonSoft\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="SimpleITKCSharpManaged, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="SimpleITKCSharpManaged, Version=1.2.0.1024, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\SimpleITK-1.2.4-CSharp-win64-x64\SimpleITKCSharpManaged.dll</HintPath>
     </Reference>
@@ -267,6 +269,11 @@
     <Compile Include="BladderART.xaml.cs">
       <DependentUpon>BladderART.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SubmitImageAndLabelsWindow.xaml.cs">
+      <DependentUpon>SubmitImageAndLabelsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SubmitImageAndLabelsWindowViewModel.cs" />
+    <Compile Include="SubmitJobWorker.cs" />
     <Compile Include="viewmodels\AutoContourViewModel.cs" />
     <Compile Include="viewmodels\BaseViewModel.cs" />
     <Compile Include="viewmodels\BladderAutoPlanViewModel.cs" />
@@ -277,8 +284,15 @@
     <Compile Include="viewmodels\RelayCommand2.cs" />
     <Compile Include="viewmodels\SegmentationTemplateEditorViewModel.cs" />
     <Compile Include="viewmodels\StepNevigatorViewModel.cs" />
+    <Compile Include="viewmodels\SubmitImageAndLabelsViewModel.cs" />
+    <Compile Include="models\SubmitJob.cs" />
+    <Compile Include="services\JobQueueService.cs" />
     <Compile Include="views\AutoContourControl.xaml.cs">
       <DependentUpon>AutoContourControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="views\Converters.cs" />
+    <Compile Include="views\SubmitImageAndLabels.xaml.cs">
+      <DependentUpon>SubmitImageAndLabels.xaml</DependentUpon>
     </Compile>
     <Compile Include="views\BladderAutoPlanControl.xaml.cs">
       <DependentUpon>BladderAutoPlanControl.xaml</DependentUpon>
@@ -333,6 +347,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="BladderART.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SubmitImageAndLabelsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -397,6 +415,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="views\StepNavigator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="views\SubmitImageAndLabels.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
