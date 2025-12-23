@@ -59,6 +59,9 @@ namespace nnunet_client.viewmodels
                 if (_selectedStructure != value)
                 {
                     _selectedStructure = value;
+
+                    helper.log($"Label '{LabelName}' (value={LabelValue}) mapped to structure: {_selectedStructure?.Id}");
+
                     OnPropertyChanged(nameof(SelectedStructure));
                 }
             }
@@ -100,6 +103,9 @@ namespace nnunet_client.viewmodels
             set
             {
                 if (_structureSet == value) return;
+
+                helper.log($"StructureSet changed to ID: {value?.Id}");
+
                 SetProperty(ref _structureSet, value, nameof(StructureSet));
                 UpdateAvailableStructures();
             }
@@ -119,7 +125,11 @@ namespace nnunet_client.viewmodels
             set
             {
                 if (_selectedDataset == value) return;
+                
+                helper.log($"SelectedDataset changed to ID: {value?.id}");
+
                 SetProperty(ref _selectedDataset, value, nameof(SelectedDataset));
+                
                 UpdateLabelMappings();
             }
         }
@@ -174,7 +184,7 @@ namespace nnunet_client.viewmodels
             {
                 if (_submitCommand == null)
                 {
-                    _submitCommand = new RelayCommand(async () => await SubmitAsync(), () => CanSubmit());
+                    _submitCommand = new RelayCommand(() => Submit(), () => CanSubmit());
                 }
                 return _submitCommand;
             }
@@ -226,7 +236,10 @@ namespace nnunet_client.viewmodels
         {
             if (StructureSet != null)
             {
-                AvailableStructures = new ObservableCollection<VMSStructure>(StructureSet.Structures);
+                List<VMSStructure> structureList = new List<VMSStructure>();
+                structureList.AddRange(StructureSet.Structures);
+
+                AvailableStructures = new ObservableCollection<VMSStructure>(structureList);
                 helper.log($"Updated available structures: {AvailableStructures.Count} structures");
             }
             else
@@ -297,15 +310,17 @@ namespace nnunet_client.viewmodels
             if (StructureSet == null)
                 return false;
 
-            // Check if all labels have a structure selected
-            return LabelMappings.All(m => m.SelectedStructure != null);
+            // Check if at least one label has a structure selected
+            return LabelMappings.Any(m => m.SelectedStructure != null);
         }
 
-        private async Task SubmitAsync()
+        private void Submit()
         {
+            helper.log("Submit() clicked...");
+
             if (!CanSubmit())
             {
-                MessageBox.Show("Please select a dataset, image for (Train/Test), and map all labels to structures.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please select a dataset, image for (Train/Test), and map at least one label to a structure.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -325,6 +340,21 @@ namespace nnunet_client.viewmodels
                 string datasetId = SelectedDataset.id;
                 string imagesFor = SelectedImageFor;
 
+                // Get SeriesUID if Series property exists
+                string seriesUID = null;
+                if (image?.Series != null)
+                {
+                    seriesUID = image.Series.UID;
+                    helper.log($"Image has Series, SeriesUID: {seriesUID}");
+                }
+                else
+                {
+                    helper.log($"Image does not have Series property");
+                }
+
+                // Log image information for debugging
+                helper.log($"Image details - Id: {image?.Id}, UID: {image?.UID}, FOR: {image?.FOR}, SeriesUID: {seriesUID}");
+
                 // Create job object
                 var job = new SubmitJob
                 {
@@ -333,9 +363,10 @@ namespace nnunet_client.viewmodels
                     PatientId = global.vmsPatient?.Id,
                     StructureSetId = StructureSet.Id,
                     StructureSetUID = StructureSet.UID,
-                    ImageId = image.Id,
-                    ImageUID = image.UID,
-                    ImageFOR = image.FOR,
+                    ImageId = image?.Id,
+                    ImageUID = image?.UID,
+                    ImageFOR = image?.FOR,
+                    SeriesUID = seriesUID,
                     LabelMappings = LabelMappings
                         .Where(m => m.SelectedStructure != null)
                         .Select(m => new SubmitJob.LabelMapping

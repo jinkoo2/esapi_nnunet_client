@@ -1,4 +1,4 @@
-﻿using esapi.UI;
+using esapi.UI;
 using esapi.ViewModel;
 using nnunet_client.views;
 using System;
@@ -103,3 +103,4 @@ namespace nnunet_client
         }
     }
 }
+

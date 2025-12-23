@@ -3,13 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"    
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"    
-             xmlns:esapiui ="clr-namespace:esapi.UI;assembly=esapi"    
+             xmlns:ui="clr-namespace:nnunet_client.UI"
              xmlns:local="clr-namespace:nnunet_client.views"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"    
              d:DesignHeight="600" d:DesignWidth="850">
 
-
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../StandardStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     
     <Grid>
         <Grid.ColumnDefinitions>
@@ -28,7 +34,7 @@
 
                 <!-- Patient Section -->
                 <GroupBox Header="Patient ID">
-                    <esapiui:AutoCompleteTextBox
+                    <ui:AutoCompleteTextBox
                         ItemsSource="{Binding PatientNameIdList}" 
                         SelectedItem="{Binding SelectedPatientNameId}"
                         Height="28"

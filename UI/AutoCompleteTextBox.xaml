@@ -1,0 +1,49 @@
+<UserControl x:Class="nnunet_client.UI.AutoCompleteTextBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="Auto" Width="Auto">
+
+    <!-- Using a Grid to position the TextBox and allow the Popup to overlay it. -->
+    <Grid>
+
+        <!-- The main input box -->
+        <!-- Note: We removed VerticalAlignment="Top" since the Grid is only containing this element -->
+        <TextBox x:Name="InputTextBox"
+                 Margin="2"
+                 TextChanged="InputTextBox_TextChanged"
+                 />
+
+        <!-- 
+            The POPUP Control: This is key. 
+            It renders OUTSIDE the parent control's bounds, preventing clipping.
+        -->
+        <Popup x:Name="SuggestionsPopup"
+               PlacementTarget="{Binding ElementName=InputTextBox}" 
+               Placement="Bottom" 
+               AllowsTransparency="True" 
+               StaysOpen="False" 
+               HorizontalOffset="-2" 
+               VerticalOffset="2"
+               >
+
+            <!-- We use a Border for styling, adding a shadow/edge to the list -->
+            <Border BorderBrush="#CCCCCC" 
+                    BorderThickness="1" 
+                    Background="White"
+                    CornerRadius="4"
+                    MaxHeight="150"
+                    HorizontalAlignment="Left">
+
+                <!-- The ListBox now sits inside the Popup -->
+                <ListBox x:Name="SuggestionsListBox"
+                         Margin="0"
+                         MouseLeftButtonUp="SuggestionsListBox_MouseLeftButtonUp"
+                         LostFocus="SuggestionsListBox_LostFocus"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         />
+            </Border>
+        </Popup>
+
+    </Grid>
+</UserControl>
+

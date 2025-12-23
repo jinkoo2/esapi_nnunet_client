@@ -84,16 +84,6 @@ namespace nnunet_client
                 global.vmsApplication.ClosePatient();
             }
         }
-
-        private void SavePatient_Click(object sender, RoutedEventArgs e)
-        {
-            if (global.vmsPatient != null)
-            {
-                helper.log("Saving...");
-                global.vmsApplication.SaveModifications();
-                helper.log("Saving done.");
-            }
-        }
     }
 }
 

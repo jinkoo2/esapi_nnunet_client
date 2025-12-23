@@ -239,13 +239,13 @@
   <ItemGroup>
     <Compile Include="App.xml.cs" />
     <Compile Include="AppConfig.cs" />
-    <Compile Include="AutoContourWindow.xaml.cs">
-      <DependentUpon>AutoContourWindow.xaml</DependentUpon>
+    <Compile Include="windows\AutoContourWindow.xaml.cs">
+      <DependentUpon>windows\AutoContourWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="BladderARTViewModel.cs" />
     <Compile Include="bladder_art.cs" />
-    <Compile Include="DoseLimitChecker.xaml.cs">
-      <DependentUpon>DoseLimitChecker.xaml</DependentUpon>
+    <Compile Include="windows\DoseLimitChecker.xaml.cs">
+      <DependentUpon>windows\DoseLimitChecker.xaml</DependentUpon>
     </Compile>
     <Compile Include="filesystem.cs" />
     <Compile Include="global.cs" />
@@ -260,17 +260,20 @@
     <Compile Include="models\StepPage.cs" />
     <Compile Include="nnUNetServiceClient.cs" />
     <Compile Include="piduuid.cs" />
-    <Compile Include="DoseLimitEditorWindow.xaml.cs">
-      <DependentUpon>DoseLimitEditorWindow.xaml</DependentUpon>
+    <Compile Include="windows\DoseLimitEditorWindow.xaml.cs">
+      <DependentUpon>windows\DoseLimitEditorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="models\TemplateManager.cs" />
     <Compile Include="models\SegmentationTemplate.cs" />
     <Compile Include="main.cs" />
-    <Compile Include="BladderART.xaml.cs">
-      <DependentUpon>BladderART.xaml</DependentUpon>
+    <Compile Include="windows\MainWindow.xaml.cs">
+      <DependentUpon>windows\MainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SubmitImageAndLabelsWindow.xaml.cs">
-      <DependentUpon>SubmitImageAndLabelsWindow.xaml</DependentUpon>
+    <Compile Include="windows\BladderART.xaml.cs">
+      <DependentUpon>windows\BladderART.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="windows\SubmitImageAndLabelsWindow.xaml.cs">
+      <DependentUpon>windows\SubmitImageAndLabelsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="SubmitImageAndLabelsWindowViewModel.cs" />
     <Compile Include="SubmitJobWorker.cs" />
@@ -332,6 +335,9 @@
     <Compile Include="views\StepNavigator.xaml.cs">
       <DependentUpon>StepNavigator.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\AutoCompleteTextBox.xaml.cs">
+      <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -342,23 +348,27 @@
     <None Include="_data\seg\templates\bladder_art.json" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="AutoContourWindow.xaml">
+    <Page Include="windows\AutoContourWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="BladderART.xaml">
+    <Page Include="windows\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SubmitImageAndLabelsWindow.xaml">
+    <Page Include="windows\BladderART.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="DoseLimitChecker.xaml">
+    <Page Include="windows\SubmitImageAndLabelsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="DoseLimitEditorWindow.xaml">
+    <Page Include="windows\DoseLimitChecker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="windows\DoseLimitEditorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -419,6 +429,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="views\SubmitImageAndLabels.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\AutoCompleteTextBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

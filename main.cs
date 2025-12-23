@@ -58,7 +58,6 @@ namespace nnunet_client
             }
         }
 
-
         static void Execute(VMS.TPS.Common.Model.API.Application vmsApp)
         {
 
@@ -94,14 +93,8 @@ namespace nnunet_client
                                      "Application Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 };
 
-                //var window = new nnunet_client.DoseLimitEditorWindow();
-                //var window = new nnunet_client.DoseLimitChecker(vmsApp);
-                //var window = new BladderART(vmsApp);
-                var window = new SubmitImageAndLabelsWindow(vmsApp);
-                //var window = new AutoContourWindow();
-
-
-                wpfApp.Run(window);
+                var mainWindow = new MainWindow(vmsApp);
+                wpfApp.Run(mainWindow);
 
                 Console.WriteLine("done");
             }

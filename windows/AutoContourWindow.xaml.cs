@@ -1,4 +1,4 @@
-﻿using nnunet_client.models;
+using nnunet_client.models;
 using nnunet_client.viewmodels;
 using System;
 using System.Collections.Generic;
@@ -25,7 +25,7 @@ namespace nnunet_client
     {
 
 
-        public AutoContourWindow()
+        public AutoContourWindow(VMS.TPS.Common.Model.API.Application esapiApp)
         {
             InitializeComponent();
 
@@ -43,3 +43,4 @@ namespace nnunet_client
         }
     }
 }
+

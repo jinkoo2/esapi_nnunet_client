@@ -4,7 +4,7 @@
         xmlns:views="clr-namespace:nnunet_client.views"
         xmlns:local="clr-namespace:nnunet_client.views"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-        xmlns:esapiui="clr-namespace:esapi.UI;assembly=esapi"
+        xmlns:ui="clr-namespace:nnunet_client.UI"
         Title="Submit Image and Labels" Height="800" Width="600"
         FontFamily="Arial" FontSize="12"
         Closed="Window_Closed" >
@@ -76,14 +76,7 @@
          Background="#EEEEEE"
          CornerRadius="5"
          Margin="5,5,5,10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBox 
-                  Grid.Column="0" 
+            <TextBox 
                   FontWeight="SemiBold"
                   FontSize="18"
                   HorizontalAlignment="Stretch"
@@ -93,15 +86,6 @@
                   Margin="0,5,0,5"
                   Padding="5"
                   Text="Submit Image and Labels"/>
-
-                <Button x:Name="SavePatient"
-                    Grid.Column="1"
-                       VerticalAlignment="Center"
-                       ToolTip="Save Patient"
-                        Click="SavePatient_Click">
-                    Save Patient
-                </Button>
-            </Grid>
         </Border>
 
         <!-- Main Content -->
@@ -114,9 +98,10 @@
 
             <!-- Patient Selection -->
             <GroupBox Grid.Row="0" Header="Select Patient" Padding="5" Margin="0,0,0,10">
-                <esapiui:AutoCompleteTextBox x:Name="PatientSearchBox"
+                <ui:AutoCompleteTextBox x:Name="PatientSearchBox"
                      Margin="0,0,0,10"
-                     HorizontalAlignment="Stretch"/>
+                     HorizontalAlignment="Left"
+                     Width="250"/>
             </GroupBox>
 
             <!-- Structure Set Selection -->
@@ -139,4 +124,5 @@
         </Grid>
     </Grid>
 </Window>
+
 

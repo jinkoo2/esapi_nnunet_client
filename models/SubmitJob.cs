@@ -22,6 +22,7 @@ namespace nnunet_client.models
         public string ImageId { get; set; }
         public string ImageUID { get; set; }
         public string ImageFOR { get; set; }
+        public string SeriesUID { get; set; }
 
         // Label mappings
         public List<LabelMapping> LabelMappings { get; set; }
